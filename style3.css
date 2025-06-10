@@ -19,9 +19,8 @@ html, body {
 /* GIF 배경을 포함하는 래퍼 */
 .background-wrapper {
   position: relative;
-  width: 100%;
-  max-width: 720px;     /* GIF 가로 길이 기준 */
-  aspect-ratio: 6 / 1;  /* GIF 원본 비율 유지 */
+  width: 100%;    
+  aspect-ratio: 6 / 1;  
   overflow: hidden;
 }
 
