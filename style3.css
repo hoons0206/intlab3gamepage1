@@ -1,20 +1,32 @@
 
-* {
+html, body {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-}
-
-html, body {
   width: 100%;
   height: 100%;
-  background-image: url('html/media/belt.gif'); /* 실제 경로로 수정하세요 */
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: cover; /* 💡 화면을 꽉 채우고 비율 유지 (잘릴 수 있음) */
+  background-color: black;
   font-family: Arial, sans-serif;
-  position: relative;
   overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+body::before {
+  content: "";
+  display: block;
+  width: 720px;              /* ✅ 고정 가로 크기 */
+  height: 120px;             /* ✅ 고정 세로 크기 */
+  background-image: url('html/media/belt.gif');
+  background-size: contain; /* 원본 비율 유지 */
+  background-repeat: no-repeat;
+  background-position: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* 정확히 가운데 정렬 */
+  z-index: -1;
+  pointer-events: none;
 }
 
 .start-button {
