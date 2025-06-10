@@ -7,7 +7,7 @@ html, body {
   background-color: black;
   font-family: Arial, sans-serif;
   overflow: hidden;
-  display: flex;
+  display: inline-block;
   justify-content: center;
   align-items: center;
 }
