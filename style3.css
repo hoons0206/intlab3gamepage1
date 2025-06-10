@@ -12,9 +12,7 @@ html, body {
   align-items: center;
 }
 
-body::before {
-  content: "";
-  display: block;
+body {
   width: 926px;              /* ✅ 고정 가로 크기 */
   height: 428px;             /* ✅ 고정 세로 크기 */
   background-image: url('html/media/belt.gif');
