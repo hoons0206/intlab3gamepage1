@@ -46,9 +46,9 @@ body {
 .back-button {
   position: absolute;
   left: 40px;
-  top: 60px;
+  top: 20px;
   padding: 10px 28px;
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #fff;
   background: transparent;
   border: 2px solid #fff;
