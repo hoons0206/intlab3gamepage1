@@ -34,6 +34,62 @@ const firebaseConfig = {
 
 <a class="start-button" href="About.html">3</a>
 </div>
+     
+         #conveyor {
+    position: relative;
+    width: 100vw;
+    height: 120px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .box {
+    width: 100px;
+    height: 100px;
+    margin: 10px 10px;
+    display: inline-block;
+    border-radius: 8px;
+    position: absolute;
+    top: 10px;
+  }
+  .type1 { background-color: #f44336; }
+  .type2 { background-color: #4caf50; }
+  .type3 { background-color: #2196f3; }
+</style>
+</head>
+<body>
+<div id="conveyor"></div>
+<script>
+  const conveyor = document.getElementById('conveyor');
+  const types = ['type1', 'type2', 'type3'];
+  const boxCount = Math.ceil(window.innerWidth / 120) + 5;
+  const boxes = [];
+  for(let i = 0; i < boxCount; i++) {
+    const box = document.createElement('div');
+    box.classList.add('box');
+    box.classList.add(types[Math.floor(Math.random() * types.length)]);
+    box.style.left = (i * 120) + 'px';
+    conveyor.appendChild(box);
+    boxes.push(box);
+  }
+  let speed = 1;
+  function animate() {
+    for(let i=0; i < boxes.length; i++) {
+      let currentLeft = parseFloat(boxes[i].style.left);
+      currentLeft -= speed;
+      if(currentLeft < -120) {
+        currentLeft = (boxCount - 1) * 120;
+        boxes[i].classList.remove(...types);
+        boxes[i].classList.add(types[Math.floor(Math.random() * types.length)]);
+      }
+      boxes[i].style.left = currentLeft + 'px';
+    }
+    requestAnimationFrame(animate);
+  }
+  animate();
+</script>
     
+</body>
+    
+</html>
 </body>
 </html>
