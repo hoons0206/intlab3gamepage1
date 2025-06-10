@@ -80,8 +80,11 @@ for(let i = 0; i < boxCount; i++) {
 
 let speed = 2.43;
 
-function animate() {
-  for(let i=0; i < boxes.length; i++) {
+const fps = 15;
+const interval = 1000 / fps; // 약 66.67ms
+let speed = 원하는_이동_픽셀_수; // 한 프레임에 이동할 픽셀 수 (예: 8)
+setInterval(() => {
+  for(let i = 0; i < boxes.length; i++) {
     let currentLeft = parseFloat(boxes[i].style.left);
     currentLeft += speed;
     if(currentLeft > (boxCount - 1) * boxSpacing) {
@@ -91,10 +94,7 @@ function animate() {
     }
     boxes[i].style.left = currentLeft + 'px';
   }
-  requestAnimationFrame(animate);
-}
-
-animate();
+}, interval
 
     </script>
 </body>
