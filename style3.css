@@ -7,16 +7,34 @@
 html, body {
   width: 100%;
   height: 100%;
-   background-image: url('html/media/belt.gif'); /* 실제 이미지 경로로 변경 */
-   background-color: white;
-  background-size: contain;
-  background-position: right;
-  background-repeat: no-repeat;
-  background-attachment: fixed; 
+  background-color: white;
+  margin: 0;
+  padding: 0;
   display: flex;
-  color: white;
+  justify-content: center;
+  align-items: center;
+  position: relative;
 }
 
+/* GIF 배경을 포함하는 래퍼 */
+.background-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 720px;     /* GIF 가로 길이 기준 */
+  aspect-ratio: 6 / 1;  /* GIF 원본 비율 유지 */
+  overflow: hidden;
+}
+
+/* 실제 GIF 배경 */
+.background-image {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: url('html/media/belt.gif'); /* 실제 경로로 변경 */
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
 .start-button {
   position: absolute;
   right: 40px;
