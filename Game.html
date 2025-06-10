@@ -16,7 +16,7 @@
       .box {
         width: 100px;
         height: 100px;
-        margin: 10px 10px;
+        margin: 10px 120px;
         display: inline-block;
         border-radius: 8px;
         position: absolute;
@@ -74,9 +74,9 @@
       function animate() {
         for(let i=0; i < boxes.length; i++) {
           let currentLeft = parseFloat(boxes[i].style.left);
-          currentLeft -= speed;
-          if(currentLeft < -120) {
-            currentLeft = (boxCount - 1) * 120;
+        currentLeft += speed;
+if(currentLeft > (boxCount - 1) * boxSpacing) {
+  currentLeft = -boxSpacing;
             boxes[i].classList.remove(...types);
             boxes[i].classList.add(types[Math.floor(Math.random() * types.length)]);
           }
