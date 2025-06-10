@@ -15,12 +15,12 @@ html, body {
 body::before {
   content: "";
   display: block;
-  width: 720px;              /* ✅ 고정 가로 크기 */
-  height: 120px;             /* ✅ 고정 세로 크기 */
+  width: 926px;              /* ✅ 고정 가로 크기 */
+  height: 428px;             /* ✅ 고정 세로 크기 */
   background-image: url('html/media/belt.gif');
   background-size: contain; /* 원본 비율 유지 */
   background-repeat: no-repeat;
-  background-position: center;
+  background-position: right;
   position: absolute;
   top: 50%;
   left: 50%;
