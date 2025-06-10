@@ -61,11 +61,11 @@
     </div>
     <div id="conveyor"></div>
     <script>
-     const conveyor = document.getElementById('conveyor');
+const conveyor = document.getElementById('conveyor');
 const types = ['type1', 'type2', 'type3'];
-const boxWidth = 100;
-const boxMarginLR = 120; // 좌우 마진
-const boxSpacing = boxWidth + boxMarginLR * 2; // 100 + 240 = 340
+const boxWidth = 70; // .box와 동일하게 맞춤
+const boxMarginLR = 120;
+const boxSpacing = boxWidth + boxMarginLR * 2; // 70 + 240 = 310
 const boxCount = Math.ceil(window.innerWidth / boxSpacing) + 5;
 const boxes = [];
 
@@ -78,11 +78,10 @@ for(let i = 0; i < boxCount; i++) {
   boxes.push(box);
 }
 
-let speed = 2.43;
-
 const fps = 15;
 const interval = 1000 / fps; // 약 66.67ms
-let speed = 원하는_이동_픽셀_수; // 한 프레임에 이동할 픽셀 수 (예: 8)
+const speed = 8; // 1초에 120px 이동하고 싶으면 8, 원하는 값으로 조정
+
 setInterval(() => {
   for(let i = 0; i < boxes.length; i++) {
     let currentLeft = parseFloat(boxes[i].style.left);
@@ -94,9 +93,9 @@ setInterval(() => {
     }
     boxes[i].style.left = currentLeft + 'px';
   }
-}, interval
+}, interval);
+</script>
 
-    </script>
 </body>
 </html>
 
