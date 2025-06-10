@@ -21,6 +21,10 @@ body {
   background-position: right;
 }
 
+.buttons {
+  display: inline-block
+}
+
 .start-button {
   position: absolute;
   right: 40px;
