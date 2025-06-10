@@ -18,7 +18,7 @@ body {
   background-image: url('html/media/belt.gif');
   background-size: contain; /* 원본 비율 유지 */
   background-repeat: no-repeat;
-  background-position: right center;
+  background-position: right;
 }
 
 .start-button {
