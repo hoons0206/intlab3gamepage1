@@ -16,13 +16,6 @@ html, body {
   position: relative;
 }
 
-/* GIF 배경을 포함하는 래퍼 */
-.background-wrapper {
-  position: relative;
-  width: 100%;    
-  aspect-ratio: 6 / 1;  
-  overflow: hidden;
-}
 
 .background-image {
   position: fixed;
@@ -33,7 +26,7 @@ html, body {
   background-image: url('html/media/belt.gif'); /* 실제 이미지 경로로 변경 */
   background-repeat: no-repeat;
   background-position: center center;
-  background-size: contain; /* 비율 유지하며 최대 크기 */
+  background-size: cover; /* 비율 유지하며 최대 크기 */
   background-color: black; /* 여백이 생길 때 자연스럽게 처리 */
   z-index: -1; /* 다른 요소보다 뒤에 위치 */
 }
