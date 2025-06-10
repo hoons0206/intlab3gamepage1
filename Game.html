@@ -58,33 +58,41 @@
     </div>
     <div id="conveyor"></div>
     <script>
-      const conveyor = document.getElementById('conveyor');
-      const types = ['type1', 'type2', 'type3'];
-      const boxCount = Math.ceil(window.innerWidth / 120) + 5;
-      const boxes = [];
-      for(let i = 0; i < boxCount; i++) {
-        const box = document.createElement('div');
-        box.classList.add('box');
-        box.classList.add(types[Math.floor(Math.random() * types.length)]);
-        box.style.left = (i * 120) + 'px';
-        conveyor.appendChild(box);
-        boxes.push(box);
-      }
-      let speed = 1;
-      function animate() {
-        for(let i=0; i < boxes.length; i++) {
-          let currentLeft = parseFloat(boxes[i].style.left);
-        currentLeft += speed;
-if(currentLeft > (boxCount - 1) * boxSpacing) {
-  currentLeft = -boxSpacing;
-            boxes[i].classList.remove(...types);
-            boxes[i].classList.add(types[Math.floor(Math.random() * types.length)]);
-          }
-          boxes[i].style.left = currentLeft + 'px';
-        }
-        requestAnimationFrame(animate);
-      }
-      animate();
+     const conveyor = document.getElementById('conveyor');
+const types = ['type1', 'type2', 'type3'];
+const boxWidth = 100;
+const boxMarginLR = 120; // 좌우 마진
+const boxSpacing = boxWidth + boxMarginLR * 2; // 100 + 240 = 340
+const boxCount = Math.ceil(window.innerWidth / boxSpacing) + 5;
+const boxes = [];
+
+for(let i = 0; i < boxCount; i++) {
+  const box = document.createElement('div');
+  box.classList.add('box');
+  box.classList.add(types[Math.floor(Math.random() * types.length)]);
+  box.style.left = (i * boxSpacing) + 'px';
+  conveyor.appendChild(box);
+  boxes.push(box);
+}
+
+let speed = 1;
+
+function animate() {
+  for(let i=0; i < boxes.length; i++) {
+    let currentLeft = parseFloat(boxes[i].style.left);
+    currentLeft += speed;
+    if(currentLeft > (boxCount - 1) * boxSpacing) {
+      currentLeft = -boxSpacing;
+      boxes[i].classList.remove(...types);
+      boxes[i].classList.add(types[Math.floor(Math.random() * types.length)]);
+    }
+    boxes[i].style.left = currentLeft + 'px';
+  }
+  requestAnimationFrame(animate);
+}
+
+animate();
+
     </script>
 </body>
 </html>
