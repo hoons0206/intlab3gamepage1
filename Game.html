@@ -132,31 +132,23 @@ const interval = 1000 / fps;
 const speed = 7;
 
 setInterval(() => {
-  const firebaseData = {};
-
   for (let i = 0; i < boxes.length; i++) {
     let currentLeft = parseFloat(boxes[i].el.style.left);
     currentLeft += speed;
 
     if (currentLeft > (boxCount - 1) * boxSpacing) {
       currentLeft = -boxSpacing;
-
-      // 컨베이어 끝에서 무채색으로 초기화
       boxes[i].el.classList.remove('show-color-type1', 'show-color-type2', 'show-color-type3');
       boxes[i].type = 'none';
     }
+
     boxes[i].el.style.left = currentLeft + 'px';
 
-firebaseData[i] = {
-  left: currentLeft,
-  type: boxes[i].type || 'type1',
-  timestamp: Date.now()
-};
+    // 위치만 업데이트 (색상, timestamp는 유지)
+    db.ref(`game/boxes/${i}/left`).set(currentLeft);
   }
-
-  db.ref('game/boxes').set(firebaseData);
 }, interval);
-
+    
   </script>
 </body>
 </html>
