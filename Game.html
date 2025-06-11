@@ -109,17 +109,20 @@ for (let i = 0; i < boxCount; i++) {
 }
 
 // 박스 클릭 시 색상 적용
-boxes.forEach((boxObj) => {
+boxes.forEach((boxObj, index) => {
   boxObj.el.addEventListener('click', () => {
     if (selectedType) {
-      // 기존 색상 클래스 모두 제거
       boxObj.el.classList.remove('show-color-type1', 'show-color-type2', 'show-color-type3');
-
-      // 새 색상 클래스 추가
       boxObj.el.classList.add(`show-color-${selectedType}`);
-
-      // 데이터도 업데이트
       boxObj.type = selectedType;
+
+      // 박스 클릭 시 개별 박스의 timestamp도 업데이트
+      const currentLeft = parseFloat(boxObj.el.style.left);
+      db.ref(`game/boxes/${index}`).set({
+        left: currentLeft,
+        type: selectedType,
+        timestamp: Date.now()
+      });
     }
   });
 });
