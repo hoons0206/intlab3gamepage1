@@ -144,10 +144,11 @@ setInterval(() => {
     }
     boxes[i].el.style.left = currentLeft + 'px';
 
-    firebaseData[i] = {
-      left: currentLeft,
-      type: boxes[i].type  // 'none' 혹은 실제 색상 타입
-    };
+firebaseData[i] = {
+  left: currentLeft,
+  type: boxes[i].type || 'type1',
+  timestamp: Date.now()
+};
   }
 
   db.ref('game/boxes').set(firebaseData);
