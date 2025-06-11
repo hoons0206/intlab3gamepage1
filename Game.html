@@ -131,23 +131,51 @@ const fps = 15;
 const interval = 1000 / fps;
 const speed = 7;
 
+// ...기존 setInterval 내부 박스 이동 부분에서 박스가 넘어갈 때 색상 큐에 저장하기
+
+const outgoingColorsRef = db.ref('game/outgoingColors');
+
 setInterval(() => {
+  const firebaseData = {};
+  const outgoingColors = [];
+
   for (let i = 0; i < boxes.length; i++) {
     let currentLeft = parseFloat(boxes[i].el.style.left);
     currentLeft += speed;
 
     if (currentLeft > (boxCount - 1) * boxSpacing) {
       currentLeft = -boxSpacing;
+
+      // 넘어가는 박스의 색상 저장 (넘어갈 때 색상만 저장)
+      if (boxes[i].type !== 'none') {
+        outgoingColors.push(boxes[i].type);
+      }
+
+      // 박스 색상 초기화
       boxes[i].el.classList.remove('show-color-type1', 'show-color-type2', 'show-color-type3');
       boxes[i].type = 'none';
     }
-
     boxes[i].el.style.left = currentLeft + 'px';
 
-    // 위치만 업데이트 (색상, timestamp는 유지)
-    db.ref(`game/boxes/${i}/left`).set(currentLeft);
+    firebaseData[i] = {
+      left: currentLeft,
+      type: boxes[i].type || 'none',
+      timestamp: Date.now()
+    };
+  }
+
+  db.ref('game/boxes').set(firebaseData);
+
+  // outgoingColors 큐에 새 색상 추가 (push)
+  if (outgoingColors.length > 0) {
+    outgoingColorsRef.once('value').then(snapshot => {
+      const oldQueue = snapshot.val() || [];
+      const newQueue = oldQueue.concat(outgoingColors);
+      outgoingColorsRef.set(newQueue);
+    });
   }
 }, interval);
+
     
   </script>
 </body>
