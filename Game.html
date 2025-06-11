@@ -106,6 +106,26 @@ boxes.forEach(box => {
     const boxCount = Math.ceil(window.innerWidth / boxSpacing) + 5;
     const boxes = [];
 
+    let selectedType = null;
+
+// 버튼 클릭 시 색상 선택
+document.querySelectorAll('.start-button').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    selectedType = btn.dataset.type;
+    console.log('선택된 색상:', selectedType);
+  });
+});
+
+// 박스 클릭 시 색상 변경
+boxes.forEach(boxObj => {
+  boxObj.el.addEventListener('click', () => {
+    if (selectedType) {
+      boxObj.el.classList.remove('type1', 'type2', 'type3');
+      boxObj.el.classList.add(selectedType);
+    }
+  });
+});
+
     for (let i = 0; i < boxCount; i++) {
       const box = document.createElement('div');
       const type = types[Math.floor(Math.random() * types.length)];
