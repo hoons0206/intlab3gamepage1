@@ -25,9 +25,9 @@
       position: absolute;
       top: 10px;
     }
-    .type1 { background-color: #111111; }
-    .type2 { background-color: #111111; }
-    .type3 { background-color: #111111; }
+    .type1 { background-color: #f33; }
+    .type2 { background-color: #3f3; }
+    .type3 { background-color: #33f; }
     .back-button {
       display: inline-block;
       margin: 10px;
@@ -53,51 +53,32 @@
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-  <script>
-    let selectedType = null; // 선택된 색상 타입 저장용
-
-// 버튼 클릭 시 색상 선택
-document.querySelectorAll('.start-button').forEach((btn, index) => {
-  btn.addEventListener('click', () => {
-    selectedType = `type${index + 1}`;
-    console.log('선택된 색상:', selectedType);
-  });
-});
-
-// 박스 클릭 시 선택된 색상으로 변경
-boxes.forEach(box => {
-  box.addEventListener('click', () => {
-    if (selectedType) {
-      box.classList.remove('type1', 'type2', 'type3');
-      box.classList.add(selectedType);
-    }
-  });
-});
-  </script>
-  <script>
-   const firebaseConfig = {
-  apiKey: "AIzaSyD4d7JvLj90ar0Q8o_AEXFTjhMZF-oI-DU",
-  authDomain: "interaction-lab-3-c4513.firebaseapp.com",
-  databaseURL: "https://interaction-lab-3-c4513-default-rtdb.firebaseio.com",
-  projectId: "interaction-lab-3-c4513",
-  storageBucket: "interaction-lab-3-c4513.firebasestorage.app",
-  messagingSenderId: "40397314576",
-  appId: "1:40397314576:web:b6bbbeb99fd43bda508895",
-  measurementId: "G-XKWS92QVP7"
-};
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-  </script>
 </head>
 <body>
   <a class="back-button" href="About.html">뒤로가기</a>
   <div class="buttons">
-  <button class="start-button" data-type="type1">1</button>
-  <button class="start-button" data-type="type2">2</button>
-  <button class="start-button" data-type="type3">3</button>
-</div>
+    <button class="start-button" data-type="type1">1</button>
+    <button class="start-button" data-type="type2">2</button>
+    <button class="start-button" data-type="type3">3</button>
+  </div>
   <div id="conveyor"></div>
+
   <script>
+    // Firebase 초기화
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4d7JvLj90ar0Q8o_AEXFTjhMZF-oI-DU",
+      authDomain: "interaction-lab-3-c4513.firebaseapp.com",
+      databaseURL: "https://interaction-lab-3-c4513-default-rtdb.firebaseio.com",
+      projectId: "interaction-lab-3-c4513",
+      storageBucket: "interaction-lab-3-c4513.firebasestorage.app",
+      messagingSenderId: "40397314576",
+      appId: "1:40397314576:web:b6bbbeb99fd43bda508895",
+      measurementId: "G-XKWS92QVP7"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 박스 생성 및 이동
     const conveyor = document.getElementById('conveyor');
     const types = ['type1', 'type2', 'type3'];
     const boxWidth = 70;
@@ -106,26 +87,6 @@ boxes.forEach(box => {
     const boxCount = Math.ceil(window.innerWidth / boxSpacing) + 5;
     const boxes = [];
 
-    let selectedType = null;
-
-// 버튼 클릭 시 색상 선택
-document.querySelectorAll('.start-button').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    selectedType = btn.dataset.type;
-    console.log('선택된 색상:', selectedType);
-  });
-});
-
-// 박스 클릭 시 색상 변경
-boxes.forEach(boxObj => {
-  boxObj.el.addEventListener('click', () => {
-    if (selectedType) {
-      boxObj.el.classList.remove('type1', 'type2', 'type3');
-      boxObj.el.classList.add(selectedType);
-    }
-  });
-});
-
     for (let i = 0; i < boxCount; i++) {
       const box = document.createElement('div');
       const type = types[Math.floor(Math.random() * types.length)];
@@ -133,37 +94,53 @@ boxes.forEach(boxObj => {
       box.setAttribute('data-id', `box${i}`);
       box.style.left = (i * boxSpacing) + 'px';
       conveyor.appendChild(box);
-      boxes.push({ el: box, id: `box${i}`, type });
+      boxes.push(box);
     }
 
+    // 색상 선택 버튼
+    let selectedType = null;
+    document.querySelectorAll('.start-button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedType = btn.dataset.type;
+        console.log('선택된 색상:', selectedType);
+      });
+    });
+
+    // 박스 클릭 시 색상 변경
+    boxes.forEach(box => {
+      box.addEventListener('click', () => {
+        if (selectedType) {
+          box.classList.remove('type1', 'type2', 'type3');
+          box.classList.add(selectedType);
+        }
+      });
+    });
+
+    // 박스 이동 + Firebase 동기화
     const fps = 15;
     const interval = 1000 / fps;
     const speed = 7;
 
-setInterval(() => {
-  const firebaseData = {};
+    setInterval(() => {
+      const firebaseData = {};
 
-  for (let i = 0; i < boxes.length; i++) {
-    let currentLeft = parseFloat(boxes[i].style.left);
-    currentLeft += speed;
-    if (currentLeft > (boxCount - 1) * boxSpacing) {
-      currentLeft = -boxSpacing;
-      boxes[i].classList.remove(...types);
-      boxes[i].classList.add(types[Math.floor(Math.random() * types.length)]);
-    }
-    boxes[i].style.left = currentLeft + 'px';
+      boxes.forEach((box, i) => {
+        let currentLeft = parseFloat(box.style.left);
+        currentLeft += speed;
 
-    firebaseData[i] = {
-      left: currentLeft,
-      type: boxes[i].classList[1] // type1, type2, type3 중 하나
-    };
-  }
+        if (currentLeft > (boxCount - 1) * boxSpacing) {
+          currentLeft = -boxSpacing;
+          box.classList.remove(...types);
+          box.classList.add(types[Math.floor(Math.random() * types.length)]);
+        }
 
-  console.log(firebaseData); // 디버깅용
-  db.ref('game/boxes').set(firebaseData); // Firebase에 저장
-}, interval);
-
+        box.style.left = currentLeft + 'px';
+        firebaseData[i] = {
+          left: currentLeft,
+          type: box.classList[1]
+        };
       });
+
       db.ref('game/boxes').set(firebaseData);
     }, interval);
   </script>
