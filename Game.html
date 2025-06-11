@@ -99,22 +99,29 @@
     const interval = 1000 / fps;
     const speed = 7;
 
-    setInterval(() => {
-      const firebaseData = {};
-      boxes.forEach(box => {
-        let currentLeft = parseFloat(box.el.style.left);
-        currentLeft += speed;
-        if (currentLeft > (boxCount - 1) * boxSpacing) {
-          currentLeft = -boxSpacing;
-          box.el.classList.remove(box.type);
-          box.type = types[Math.floor(Math.random() * types.length)];
-          box.el.classList.add(box.type);
-        }
-        box.el.style.left = currentLeft + 'px';
-        firebaseData[box.id] = {
-          left: currentLeft,
-          type: box.type
-        };
+setInterval(() => {
+  const firebaseData = {};
+
+  for (let i = 0; i < boxes.length; i++) {
+    let currentLeft = parseFloat(boxes[i].style.left);
+    currentLeft += speed;
+    if (currentLeft > (boxCount - 1) * boxSpacing) {
+      currentLeft = -boxSpacing;
+      boxes[i].classList.remove(...types);
+      boxes[i].classList.add(types[Math.floor(Math.random() * types.length)]);
+    }
+    boxes[i].style.left = currentLeft + 'px';
+
+    firebaseData[i] = {
+      left: currentLeft,
+      type: boxes[i].classList[1] // type1, type2, type3 중 하나
+    };
+  }
+
+  console.log(firebaseData); // 디버깅용
+  db.ref('game/boxes').set(firebaseData); // Firebase에 저장
+}, interval);
+
       });
       db.ref('game/boxes').set(firebaseData);
     }, interval);
