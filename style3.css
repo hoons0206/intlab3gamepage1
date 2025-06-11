@@ -24,6 +24,9 @@ body {
 .type2 { background-color: #FFD700; } /* 노랑 */
 .type3 { background-color: #5A8DFF; } /* 파랑 */
 
+.type1, .type2, .type3 {
+  background-color: #111111;
+}
 
 /* 버튼 컨테이너를 우측 하단에 고정 */
 .buttons {
