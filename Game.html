@@ -4,7 +4,6 @@
   <title>1P 화면</title>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <link rel="stylesheet" href="style3.css">
   <style>
     #conveyor {
       position: absolute;
@@ -24,10 +23,13 @@
       border-radius: 1px;
       position: absolute;
       top: 10px;
+      background-color: #111;
     }
-    .type1 { background-color: #f33; }
-    .type2 { background-color: #3f3; }
-    .type3 { background-color: #33f; }
+    /* 표시용 색상 클래스 */
+    .show-color-type1 { background-color: red !important; }
+    .show-color-type2 { background-color: green !important; }
+    .show-color-type3 { background-color: blue !important; }
+
     .back-button {
       display: inline-block;
       margin: 10px;
@@ -53,6 +55,20 @@
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4d7JvLj90ar0Q8o_AEXFTjhMZF-oI-DU",
+      authDomain: "interaction-lab-3-c4513.firebaseapp.com",
+      databaseURL: "https://interaction-lab-3-c4513-default-rtdb.firebaseio.com",
+      projectId: "interaction-lab-3-c4513",
+      storageBucket: "interaction-lab-3-c4513.appspot.com",
+      messagingSenderId: "40397314576",
+      appId: "1:40397314576:web:b6bbbeb99fd43bda508895",
+      measurementId: "G-XKWS92QVP7"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+  </script>
 </head>
 <body>
   <a class="back-button" href="About.html">뒤로가기</a>
@@ -62,23 +78,7 @@
     <button class="start-button" data-type="type3">3</button>
   </div>
   <div id="conveyor"></div>
-
   <script>
-    // Firebase 초기화
-    const firebaseConfig = {
-      apiKey: "AIzaSyD4d7JvLj90ar0Q8o_AEXFTjhMZF-oI-DU",
-      authDomain: "interaction-lab-3-c4513.firebaseapp.com",
-      databaseURL: "https://interaction-lab-3-c4513-default-rtdb.firebaseio.com",
-      projectId: "interaction-lab-3-c4513",
-      storageBucket: "interaction-lab-3-c4513.firebasestorage.app",
-      messagingSenderId: "40397314576",
-      appId: "1:40397314576:web:b6bbbeb99fd43bda508895",
-      measurementId: "G-XKWS92QVP7"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    // 박스 생성 및 이동
     const conveyor = document.getElementById('conveyor');
     const types = ['type1', 'type2', 'type3'];
     const boxWidth = 70;
@@ -86,7 +86,17 @@
     const boxSpacing = boxWidth + boxMarginLR * 2;
     const boxCount = Math.ceil(window.innerWidth / boxSpacing) + 5;
     const boxes = [];
+    let selectedType = null;
 
+    // 버튼 클릭 시 색상 선택
+    document.querySelectorAll('.start-button').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        selectedType = btn.dataset.type;
+        console.log('선택된 색상:', selectedType);
+      });
+    });
+
+    // 박스 생성
     for (let i = 0; i < boxCount; i++) {
       const box = document.createElement('div');
       const type = types[Math.floor(Math.random() * types.length)];
@@ -94,29 +104,20 @@
       box.setAttribute('data-id', `box${i}`);
       box.style.left = (i * boxSpacing) + 'px';
       conveyor.appendChild(box);
-      boxes.push(box);
+      boxes.push({ el: box, id: `box${i}`, type });
     }
 
-    // 색상 선택 버튼
-    let selectedType = null;
-    document.querySelectorAll('.start-button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        selectedType = btn.dataset.type;
-        console.log('선택된 색상:', selectedType);
-      });
-    });
-
-    // 박스 클릭 시 색상 변경
-    boxes.forEach(box => {
-      box.addEventListener('click', () => {
+    // 박스 클릭 시 색상 적용
+    boxes.forEach((boxObj, index) => {
+      boxObj.el.addEventListener('click', () => {
         if (selectedType) {
-          box.classList.remove('type1', 'type2', 'type3');
-          box.classList.add(selectedType);
+          boxObj.el.classList.remove('show-color-type1', 'show-color-type2', 'show-color-type3');
+          boxObj.el.classList.add(`show-color-${selectedType}`);
+          boxObj.type = selectedType;
         }
       });
     });
 
-    // 박스 이동 + Firebase 동기화
     const fps = 15;
     const interval = 1000 / fps;
     const speed = 7;
@@ -124,26 +125,24 @@
     setInterval(() => {
       const firebaseData = {};
 
-      boxes.forEach((box, i) => {
-        let currentLeft = parseFloat(box.style.left);
+      for (let i = 0; i < boxes.length; i++) {
+        let currentLeft = parseFloat(boxes[i].el.style.left);
         currentLeft += speed;
-
         if (currentLeft > (boxCount - 1) * boxSpacing) {
           currentLeft = -boxSpacing;
-          box.classList.remove(...types);
-          box.classList.add(types[Math.floor(Math.random() * types.length)]);
+          boxes[i].el.classList.remove('show-color-type1', 'show-color-type2', 'show-color-type3');
+          boxes[i].type = types[Math.floor(Math.random() * types.length)];
         }
+        boxes[i].el.style.left = currentLeft + 'px';
 
-        box.style.left = currentLeft + 'px';
         firebaseData[i] = {
           left: currentLeft,
-          type: box.classList[1]
+          type: boxes[i].type || 'type1' // type은 내부 데이터용
         };
-      });
+      }
 
       db.ref('game/boxes').set(firebaseData);
     }, interval);
   </script>
 </body>
 </html>
-
