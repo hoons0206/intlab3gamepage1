@@ -24,7 +24,7 @@ html, body {
 .start-button {
   position: absolute;
   right: 40px;
-  bottom: 60px;
+  bottom: 20px;
   padding: 10px 28px;
   font-size: 1.1rem;
   color: #fff;
