@@ -13,6 +13,7 @@ html, body {
   color: white;
  background-color: black;
   overflow: hidden;
+    padding: env(safe-area-inset);
 }
 
 .background-image {
