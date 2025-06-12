@@ -107,27 +107,6 @@ html, body {
     padding: env(safe-area-inset);
 }
 
-.background-image {
-  width: 300px; /* 원하는 고정 크기 */
-  height: 300px;
-  background-image: url('html/media/1.png'); /* 실제 이미지 경로로 변경 */
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-   position: absolute;
-  right: 0;
-  top: 50%;
- transform: 
- translateY(-50%);
-  animation: fadeInOut 4s infinite;
-  opacity: 0;
-}
-
-@keyframes fadeInOut {
-  0%, 100% { opacity: 0; }
-  50% { opacity: 1; }
-}
-
 .intro {
   position: absolute;
   top: 40px;
