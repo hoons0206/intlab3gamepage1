@@ -5,7 +5,7 @@
 }
 
 html, body {
-  width: 100%;
+  width: 100dvh;
   height: 100dvh;
   display: flex;
   justify-content: left;
@@ -139,8 +139,8 @@ body::after {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+   width: 100dvh;
+  height: 100dvh;
   pointer-events: none;
   z-index: 96;
 }
