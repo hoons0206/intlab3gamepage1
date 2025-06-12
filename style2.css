@@ -13,7 +13,7 @@ html, body {
   height: 100%;
    background-image: url('html/media/2.png'); /* 실제 이미지 경로로 변경 */
   background-color: black;
-  background-size: cover;
+  background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed; 
