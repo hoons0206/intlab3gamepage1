@@ -88,3 +88,164 @@ html, body {
     display: none !important;
   }
 }
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100vw;
+  height: 100dvh;
+  display: flex;
+  justify-content: left;
+  position: relative;
+  color: white;
+ background-color: black;
+  overflow: hidden;
+    padding: env(safe-area-inset);
+}
+
+.background-image {
+  width: 300px; /* 원하는 고정 크기 */
+  height: 300px;
+  background-image: url('html/media/1.png'); /* 실제 이미지 경로로 변경 */
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+   position: absolute;
+  right: 0;
+  top: 50%;
+ transform: 
+ translateY(-50%);
+  animation: fadeInOut 4s infinite;
+  opacity: 0;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+.intro {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  color: #fff;
+  font-size: 1.2rem;
+  letter-spacing: 0.02em;
+}
+
+.start-button {
+  position: absolute;
+  left: 40px;
+  bottom: 60px;
+  padding: 10px 28px;
+  font-size: 1.1rem;
+  color: #fff;
+  background: transparent;
+  border: 2px solid #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+    text-decoration: none;
+}
+
+@media screen and (orientation: portrait) {
+  body::before {
+    content: "가로 모드에서 최적화되어 있습니다. A기기를 돌려주세요.";
+    white-space: pre;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+     width: 100vw;
+  height: 100dvh;
+    background: rgba(0, 0, 0, 0.9);
+    color: #fff;
+    font-size: 1.5rem;
+    z-index: 9999;
+    padding: 2rem;
+    box-sizing: border-box;
+    text-align: center;
+  }
+
+  .intro,
+  .background-image,
+  .start-button {
+    display: none !important;
+  }
+}
+
+@keyframes bloom {
+  0%, 100% { opacity: 0.08; }
+  50% { opacity: 0.25; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes press {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* 🔧 body 효과만 기존과 병합해서 재작성 */
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #1a1a1a;
+  color: white;
+  display: flex;
+  justify-content: left;
+  position: relative;
+  image-rendering: pixelated;
+
+}
+
+/* 🔧 CRT 수직 라인 효과 */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.05) 0,
+    rgba(255,255,255,0.05) 5px,
+    transparent 10px
+  );
+  pointer-events: none;
+  z-index: 98;
+}
+
+/* 🔧 CRT 프레임 효과 */
+.crt-frame {
+  position: fixed;
+  top: 0;
+  left: 0;
+   width: 100vw;
+  height: 100dvh;
+  pointer-events: none;
+  z-index: 96;
+}
+
+/* 🔧 CRT 중심 발광 효과 */
+.crt-bloom {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+   width: 100vw;
+  height: 100dvh;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 75%);
+  animation: bloom 6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 97;
+}
