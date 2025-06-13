@@ -50,6 +50,23 @@ body {
   text-decoration: none;
 }
 
+#color-sequence-display {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 6px;
+}
+.color-sequence-block {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #222;
+  border-radius: 4px;
+}
+.color-type1 { background-color: red; }
+.color-type2 { background-color: green; }
+.color-type3 { background-color: blue; }
+
 /* 뒤로가기 버튼 위치는 그대로 유지 */
 .back-button {
   position: absolute;
