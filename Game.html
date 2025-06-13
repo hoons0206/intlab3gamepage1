@@ -174,49 +174,56 @@
       boxes.push(boxObj);
     }
 
-    function startGameLoop() {
-      setInterval(() => {
-        // 새 박스 추가
-        createBox();
+   let boxSpawnTimer = 0;
+const boxSpawnInterval = 60; // 60 프레임마다 = 약 2초 간격 (30fps 기준)
 
-        // 모든 박스 이동
-        const firebaseData = {};
-        const outgoingColors = [];
+function startGameLoop() {
+  setInterval(() => {
+    boxSpawnTimer++;
 
-        boxes.forEach((boxObj, index) => {
-          boxObj.left += speed;
-          boxObj.el.style.left = boxObj.left + 'px';
-
-          firebaseData[boxObj.id] = {
-            left: boxObj.left,
-            type: boxObj.type,
-            timestamp: Date.now()
-          };
-
-          if (boxObj.left > window.innerWidth) {
-            // 화면을 나간 경우
-            if (boxObj.type === 'none') {
-              window.location.href = 'Fail.html';
-            } else {
-              outgoingColors.push(boxObj.type);
-            }
-            boxObj.el.remove();
-            boxes.splice(index, 1);
-          }
-        });
-
-        db.ref('game/boxes').set(firebaseData);
-
-        if (outgoingColors.length > 0) {
-          outgoingColorsRef.once('value').then(snapshot => {
-            const oldQueue = snapshot.val() || [];
-            const newQueue = oldQueue.concat(outgoingColors);
-            outgoingColorsRef.set(newQueue);
-          });
-        }
-
-      }, 1000 / 30); // 30fps
+    // 일정 프레임마다 박스를 생성
+    if (boxSpawnTimer >= boxSpawnInterval) {
+      createBox();
+      boxSpawnTimer = 0;
     }
+
+    // 박스 이동 및 Firebase 동기화 로직은 동일
+    const firebaseData = {};
+    const outgoingColors = [];
+
+    boxes.forEach((boxObj, index) => {
+      boxObj.left += speed;
+      boxObj.el.style.left = boxObj.left + 'px';
+
+      firebaseData[boxObj.id] = {
+        left: boxObj.left,
+        type: boxObj.type,
+        timestamp: Date.now()
+      };
+
+      if (boxObj.left > window.innerWidth) {
+        if (boxObj.type === 'none') {
+          window.location.href = 'Fail.html';
+        } else {
+          outgoingColors.push(boxObj.type);
+        }
+        boxObj.el.remove();
+        boxes.splice(index, 1);
+      }
+    });
+
+    db.ref('game/boxes').set(firebaseData);
+
+    if (outgoingColors.length > 0) {
+      outgoingColorsRef.once('value').then(snapshot => {
+        const oldQueue = snapshot.val() || [];
+        const newQueue = oldQueue.concat(outgoingColors);
+        outgoingColorsRef.set(newQueue);
+      });
+    }
+  }, 1000 / 15); // 30fps
+}
+
   </script>
 </body>
 </html>
