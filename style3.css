@@ -19,6 +19,7 @@ body {
   justify-content: flex-end;
   align-items: flex-end;
   position: relative;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
 }
 
 .type1 { background-color: #FF5A5A; } /* 빨강 */
