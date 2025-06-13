@@ -99,9 +99,13 @@
   const boxes = [];
   let selectedType = null;
 
+  // 정답 배열 관련 변수
   const targetLength = 3;
   let currentSequence = [];
   let currentIndex = 0;
+
+  let timerStarted = false;
+  let intervalId = null;
 
   function generateRandomSequence() {
     const seq = [];
@@ -146,8 +150,61 @@
     boxes.push({ el: box, id: `box${i}`, type: 'none' });
   }
 
+  function startTimer() {
+    const fps = 15;
+    const interval = 1000 / fps;
+    const speed = 7;
+    const outgoingColorsRef = db.ref('game/outgoingColors');
+
+    intervalId = setInterval(() => {
+      const firebaseData = {};
+      const outgoingColors = [];
+
+      for (let i = 0; i < boxes.length; i++) {
+        let currentLeft = parseFloat(boxes[i].el.style.left);
+        currentLeft += speed;
+
+        if (currentLeft > (boxCount - 1) * boxSpacing) {
+          currentLeft = -boxSpacing;
+
+          if (boxes[i].type === 'none') {
+            window.location.href = 'Fail.html';
+          } else {
+            outgoingColors.push(boxes[i].type);
+          }
+
+          boxes[i].el.classList.remove('show-color-type1', 'show-color-type2', 'show-color-type3');
+          boxes[i].type = 'none';
+        }
+
+        boxes[i].el.style.left = currentLeft + 'px';
+        firebaseData[i] = {
+          left: currentLeft,
+          type: boxes[i].type || 'none',
+          timestamp: Date.now()
+        };
+      }
+
+      db.ref('game/boxes').set(firebaseData);
+
+      if (outgoingColors.length > 0) {
+        outgoingColorsRef.once('value').then(snapshot => {
+          const oldQueue = snapshot.val() || [];
+          const newQueue = oldQueue.concat(outgoingColors);
+          outgoingColorsRef.set(newQueue);
+        });
+      }
+    }, interval);
+  }
+
+  // 박스 클릭 이벤트 처리
   boxes.forEach((boxObj, index) => {
     boxObj.el.addEventListener('click', () => {
+      if (!timerStarted) {
+        timerStarted = true;
+        startTimer();
+      }
+
       if (selectedType) {
         boxObj.el.classList.remove('show-color-type1', 'show-color-type2', 'show-color-type3');
         boxObj.el.classList.add(`show-color-${selectedType}`);
@@ -160,6 +217,7 @@
           timestamp: Date.now()
         });
 
+        // 사용자 입력 검사
         if (selectedType === currentSequence[currentIndex]) {
           currentIndex++;
           if (currentIndex >= currentSequence.length) {
@@ -171,59 +229,8 @@
       }
     });
   });
-
-  // 게임 시작 시간 기록 (5초 유예용)
-  const gameStartTime = Date.now();
-
-  const fps = 15;
-  const interval = 1000 / fps;
-  const speed = 7;
-  const outgoingColorsRef = db.ref('game/outgoingColors');
-
-  setInterval(() => {
-    const firebaseData = {};
-    const outgoingColors = [];
-
-    for (let i = 0; i < boxes.length; i++) {
-      let currentLeft = parseFloat(boxes[i].el.style.left);
-      currentLeft += speed;
-
-      if (currentLeft > (boxCount - 1) * boxSpacing) {
-        currentLeft = -boxSpacing;
-
-        const elapsedTime = Date.now() - gameStartTime;
-        if (boxes[i].type === 'none') {
-          if (elapsedTime > 5000) {  // 5초 지나야 Fail 체크
-            window.location.href = 'Fail.html';
-            return;
-          }
-        } else {
-          outgoingColors.push(boxes[i].type);
-        }
-
-        boxes[i].el.classList.remove('show-color-type1', 'show-color-type2', 'show-color-type3');
-        boxes[i].type = 'none';
-      }
-
-      boxes[i].el.style.left = currentLeft + 'px';
-      firebaseData[i] = {
-        left: currentLeft,
-        type: boxes[i].type || 'none',
-        timestamp: Date.now()
-      };
-    }
-
-    db.ref('game/boxes').set(firebaseData);
-
-    if (outgoingColors.length > 0) {
-      outgoingColorsRef.once('value').then(snapshot => {
-        const oldQueue = snapshot.val() || [];
-        const newQueue = oldQueue.concat(outgoingColors);
-        outgoingColorsRef.set(newQueue);
-      });
-    }
-  }, interval);
 </script>
+
 
 </body>
 </html>
