@@ -58,8 +58,8 @@ body {
   gap: 6px;
   z-index: 9999; /* 위로 올리기 */
   background: rgba(255, 255, 255, 0.8); /* 잘림 방지를 위해 배경도 추가 가능 */
-  padding: 6px;
-  border-radius: 3px white;
+  padding: 2px;
+  border-radius: 1px white;
 }
 
 .color-sequence-block {
@@ -68,9 +68,9 @@ body {
   border: 2px solid #222;
   border-radius: 4px;
 }
-.color-type1 { background-color: red; }
-.color-type2 { background-color: green; }
-.color-type3 { background-color: blue; }
+.color-type1 { background-color: #FF5A5A; }
+.color-type2 { background-color: #FFD700; }
+.color-type3 { background-color: #5A8DFF; }
 
 /* 뒤로가기 버튼 위치는 그대로 유지 */
 .back-button {
