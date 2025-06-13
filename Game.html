@@ -184,16 +184,21 @@
       let currentLeft = parseFloat(boxes[i].el.style.left);
       currentLeft += speed;
 
-      if (currentLeft > (boxCount - 1) * boxSpacing) {
-        currentLeft = -boxSpacing;
+if (currentLeft > (boxCount - 1) * boxSpacing) {
+  currentLeft = -boxSpacing;
 
-        if (boxes[i].type !== 'none') {
-          outgoingColors.push(boxes[i].type);
-        }
+  if (boxes[i].type === 'none') {
+    // 디폴트 박스가 그대로 넘어간 경우 실패 페이지로 이동
+    window.location.href = 'Fail.html';
+  } else {
+    outgoingColors.push(boxes[i].type);
+  }
 
-        boxes[i].el.classList.remove('show-color-type1', 'show-color-type2', 'show-color-type3');
-        boxes[i].type = 'none';
-      }
+  // 박스 리셋
+  boxes[i].el.classList.remove('show-color-type1', 'show-color-type2', 'show-color-type3');
+  boxes[i].type = 'none';
+}
+
 
       boxes[i].el.style.left = currentLeft + 'px';
 
