@@ -4,7 +4,7 @@
   <title>1P 화면</title>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-   <link rel="stylesheet" href="style3.css">
+  <link rel="stylesheet" href="style3.css">
   <style>
     #conveyor {
       position: absolute;
@@ -26,11 +26,9 @@
       top: 10px;
       background-color: #111;
     }
-    /* 표시용 색상 클래스 */
     .show-color-type1 { background-color: red !important; }
     .show-color-type2 { background-color: green !important; }
     .show-color-type3 { background-color: blue !important; }
-
     .back-button {
       display: inline-block;
       margin: 10px;
@@ -53,6 +51,16 @@
       border-radius: 6px;
       text-decoration: none;
     }
+    .color-sequence-block {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      margin: 5px;
+      border-radius: 4px;
+    }
+    .color-type1 { background-color: red; }
+    .color-type2 { background-color: green; }
+    .color-type3 { background-color: blue; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
@@ -80,7 +88,8 @@
     <button class="start-button" data-type="type3">파랑</button>
   </div>
   <div id="conveyor"></div>
- <script>
+
+<script>
   const conveyor = document.getElementById('conveyor');
   const types = ['type1', 'type2', 'type3'];
   const boxWidth = 70;
@@ -90,7 +99,6 @@
   const boxes = [];
   let selectedType = null;
 
-  // 정답 배열 관련 변수
   const targetLength = 3;
   let currentSequence = [];
   let currentIndex = 0;
@@ -120,10 +128,8 @@
     displaySequence(currentSequence);
   }
 
-  // 초기 정답 배열 생성
   resetSequence();
 
-  // 버튼 클릭 시 색상 선택
   document.querySelectorAll('.start-button').forEach((btn) => {
     btn.addEventListener('click', () => {
       selectedType = btn.dataset.type;
@@ -131,7 +137,6 @@
     });
   });
 
-  // 박스 생성
   for (let i = 0; i < boxCount; i++) {
     const box = document.createElement('div');
     box.classList.add('box');
@@ -141,7 +146,6 @@
     boxes.push({ el: box, id: `box${i}`, type: 'none' });
   }
 
-  // 박스 클릭 이벤트 처리
   boxes.forEach((boxObj, index) => {
     boxObj.el.addEventListener('click', () => {
       if (selectedType) {
@@ -156,24 +160,24 @@
           timestamp: Date.now()
         });
 
-        // 사용자 입력 검사
         if (selectedType === currentSequence[currentIndex]) {
           currentIndex++;
           if (currentIndex >= currentSequence.length) {
-            resetSequence();  // 성공 시 다음 배열로
+            resetSequence();
           }
         } else {
-          window.location.href = 'Fail.html';  // 틀릴 경우
+          window.location.href = 'Fail.html';
         }
       }
     });
   });
 
-  // 박스 이동 처리
+  // 게임 시작 시간 기록 (5초 유예용)
+  const gameStartTime = Date.now();
+
   const fps = 15;
   const interval = 1000 / fps;
   const speed = 7;
-
   const outgoingColorsRef = db.ref('game/outgoingColors');
 
   setInterval(() => {
@@ -184,24 +188,24 @@
       let currentLeft = parseFloat(boxes[i].el.style.left);
       currentLeft += speed;
 
-if (currentLeft > (boxCount - 1) * boxSpacing) {
-  currentLeft = -boxSpacing;
+      if (currentLeft > (boxCount - 1) * boxSpacing) {
+        currentLeft = -boxSpacing;
 
-  if (boxes[i].type === 'none') {
-    // 디폴트 박스가 그대로 넘어간 경우 실패 페이지로 이동
-    window.location.href = 'Fail.html';
-  } else {
-    outgoingColors.push(boxes[i].type);
-  }
+        const elapsedTime = Date.now() - gameStartTime;
+        if (boxes[i].type === 'none') {
+          if (elapsedTime > 5000) {  // 5초 지나야 Fail 체크
+            window.location.href = 'Fail.html';
+            return;
+          }
+        } else {
+          outgoingColors.push(boxes[i].type);
+        }
 
-  // 박스 리셋
-  boxes[i].el.classList.remove('show-color-type1', 'show-color-type2', 'show-color-type3');
-  boxes[i].type = 'none';
-}
-
+        boxes[i].el.classList.remove('show-color-type1', 'show-color-type2', 'show-color-type3');
+        boxes[i].type = 'none';
+      }
 
       boxes[i].el.style.left = currentLeft + 'px';
-
       firebaseData[i] = {
         left: currentLeft,
         type: boxes[i].type || 'none',
@@ -223,3 +227,4 @@ if (currentLeft > (boxCount - 1) * boxSpacing) {
 
 </body>
 </html>
+
