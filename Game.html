@@ -52,6 +52,16 @@
       border-radius: 6px;
       text-decoration: none;
     }
+    .color-sequence-block {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      margin: 5px;
+      border-radius: 4px;
+    }
+    .color-type1 { background-color: red; }
+    .color-type2 { background-color: green; }
+    .color-type3 { background-color: blue; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
@@ -84,13 +94,16 @@
     const conveyor = document.getElementById('conveyor');
     const types = ['type1', 'type2', 'type3'];
     const boxWidth = 70;
-    const boxMarginLR = 120;
-    const boxSpacing = boxWidth + boxMarginLR * 2;
-    const boxCount = Math.ceil(window.innerWidth / boxSpacing) + 5;
-    const boxes = [];
+    const boxSpacing = 180;
+    const speed = 2;
     let selectedType = null;
-    let timerStarted = false;
+    let started = false;
+    let boxes = [];
+    let boxId = 0;
 
+    const outgoingColorsRef = db.ref('game/outgoingColors');
+
+    // 정답 배열 로직
     const targetLength = 3;
     let currentSequence = [];
     let currentIndex = 0;
@@ -122,43 +135,30 @@
 
     resetSequence();
 
-    document.querySelectorAll('.start-button').forEach((btn) => {
+    // 버튼 클릭
+    document.querySelectorAll('.start-button').forEach(btn => {
       btn.addEventListener('click', () => {
         selectedType = btn.dataset.type;
-        console.log('선택된 색상:', selectedType);
+        if (!started) {
+          started = true;
+          startGameLoop();
+        }
       });
     });
 
-    // 박스 생성
-    for (let i = 0; i < boxCount; i++) {
+    function createBox() {
       const box = document.createElement('div');
-      box.classList.add('box');
-      box.setAttribute('data-id', `box${i}`);
-      box.style.left = (i * boxSpacing) + 'px';
+      box.className = 'box';
+      box.style.left = '0px';
       conveyor.appendChild(box);
-      boxes.push({ el: box, id: `box${i}`, type: 'none', clicked: false });
-    }
+      const id = 'box' + boxId++;
+      const boxObj = { el: box, id: id, left: 0, type: 'none' };
 
-    // 박스 클릭 이벤트
-    boxes.forEach((boxObj, index) => {
-      boxObj.el.addEventListener('click', () => {
-        if (!timerStarted) {
-          timerStarted = true;
-          startTimer(); // 타이머 시작
-        }
-
+      box.addEventListener('click', () => {
         if (selectedType) {
-          boxObj.el.classList.remove('show-color-type1', 'show-color-type2', 'show-color-type3');
-          boxObj.el.classList.add(`show-color-${selectedType}`);
+          box.classList.remove('show-color-type1', 'show-color-type2', 'show-color-type3');
+          box.classList.add(`show-color-${selectedType}`);
           boxObj.type = selectedType;
-          boxObj.clicked = true;
-
-          const currentLeft = parseFloat(boxObj.el.style.left);
-          db.ref(`game/boxes/${index}`).set({
-            left: currentLeft,
-            type: selectedType,
-            timestamp: Date.now()
-          });
 
           if (selectedType === currentSequence[currentIndex]) {
             currentIndex++;
@@ -170,46 +170,40 @@
           }
         }
       });
-    });
 
-    // 박스 이동 타이머
-    let moveInterval;
-    function startTimer() {
-      const fps = 15;
-      const interval = 1000 / fps;
-      const speed = 7;
-      const outgoingColorsRef = db.ref('game/outgoingColors');
+      boxes.push(boxObj);
+    }
 
-      moveInterval = setInterval(() => {
+    function startGameLoop() {
+      setInterval(() => {
+        // 새 박스 추가
+        createBox();
+
+        // 모든 박스 이동
         const firebaseData = {};
         const outgoingColors = [];
 
-        for (let i = 0; i < boxes.length; i++) {
-          let currentLeft = parseFloat(boxes[i].el.style.left);
-          currentLeft += speed;
+        boxes.forEach((boxObj, index) => {
+          boxObj.left += speed;
+          boxObj.el.style.left = boxObj.left + 'px';
 
-          if (currentLeft > (boxCount - 1) * boxSpacing) {
-            currentLeft = -boxSpacing;
-
-            if (!boxes[i].clicked) {
-              window.location.href = 'Fail.html'; // 클릭되지 않은 박스가 나가면 실패
-            } else {
-              outgoingColors.push(boxes[i].type);
-            }
-
-            boxes[i].el.classList.remove('show-color-type1', 'show-color-type2', 'show-color-type3');
-            boxes[i].type = 'none';
-            boxes[i].clicked = false;
-          }
-
-          boxes[i].el.style.left = currentLeft + 'px';
-
-          firebaseData[i] = {
-            left: currentLeft,
-            type: boxes[i].type || 'none',
+          firebaseData[boxObj.id] = {
+            left: boxObj.left,
+            type: boxObj.type,
             timestamp: Date.now()
           };
-        }
+
+          if (boxObj.left > window.innerWidth) {
+            // 화면을 나간 경우
+            if (boxObj.type === 'none') {
+              window.location.href = 'Fail.html';
+            } else {
+              outgoingColors.push(boxObj.type);
+            }
+            boxObj.el.remove();
+            boxes.splice(index, 1);
+          }
+        });
 
         db.ref('game/boxes').set(firebaseData);
 
@@ -220,9 +214,9 @@
             outgoingColorsRef.set(newQueue);
           });
         }
-      }, interval);
+
+      }, 1000 / 30); // 30fps
     }
   </script>
 </body>
 </html>
-
