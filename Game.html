@@ -91,6 +91,7 @@
 
   // Firebase 경로
   const outgoingColorsRef = db.ref('game/outgoingColors');
+  const incomingBoxesRef = db.ref('game/2p_incomingBoxes');
 
   // 정답 배열 관련
   const targetLength = 3;
@@ -179,38 +180,24 @@
       spawnTimer = 0;
     }
 
-    const firebaseData = {};
-    const outgoingColors = [];
-
     for (let i = boxes.length - 1; i >= 0; i--) {
       const box = boxes[i];
       box.left += speed;
       box.el.style.left = box.left + 'px';
 
-      firebaseData[box.id] = {
-        left: box.left,
-        type: box.type,
-        timestamp: Date.now()
-      };
-
       if (box.left > window.innerWidth) {
         if (box.type === 'none') {
           window.location.href = 'Fail.html';
         } else {
-          outgoingColors.push(box.type);
+          // 2P용 큐에 박스 정보 push
+          incomingBoxesRef.push({
+            type: box.type,
+            timestamp: Date.now()
+          });
         }
         box.el.remove();
         boxes.splice(i, 1);
       }
-    }
-
-    db.ref('game/boxes').set(firebaseData);
-
-    if (outgoingColors.length > 0) {
-      outgoingColorsRef.once('value').then(snapshot => {
-        const oldQueue = snapshot.val() || [];
-        outgoingColorsRef.set(oldQueue.concat(outgoingColors));
-      });
     }
   }, 1000 / 30);
 </script>
