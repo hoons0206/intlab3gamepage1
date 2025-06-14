@@ -114,13 +114,13 @@ body {
 #conveyor {
       position: absolute;
       left: 0;
-      bottom: 40%;
+      bottom: 10%;
       width: 100vw;
       height: 100px;
       overflow: hidden;
       white-space: nowrap;
     }
- .box {
+ .box-img {
       width: 100px;
       height: 100px;
       margin: 10px 120px;
