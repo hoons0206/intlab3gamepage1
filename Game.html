@@ -1,51 +1,207 @@
-<!-- 1P.html -->
 <!DOCTYPE html>
 <html>
 <head>
+  <title>1P 화면</title>
   <meta charset="UTF-8" />
-  <title>1P</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <link rel="stylesheet" href="style3.css">
+  <style>
+    #conveyor {
+      position: absolute;
+      left: 0;
+      bottom: 50%;
+      width: 100vw;
+      height: 100px;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+ .box {
+      width: 70px;
+      height: 70px;
+      margin: 10px 120px;
+      display: inline-block;
+      border-radius: 1px;
+      position: absolute;
+      top: 10px;
+      background-color: #111;
+ }
+    .show-color-type1 { background-color: red !important; }
+    .show-color-type2 { background-color: green !important; }
+    .show-color-type3 { background-color: blue !important; }
+    .back-button {
+      display: inline-block;
+      margin: 10px;
+      padding: 8px 16px;
+      background: #eee;
+      border-radius: 6px;
+      text-decoration: none;
+      color: #222;
+    }
+    .color-sequence-block {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      margin: 4px;
+      border-radius: 4px;
+    }
+    .color-type1 { background-color: red; }
+    .color-type2 { background-color: green; }
+    .color-type3 { background-color: blue; }
+  </style>
+
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-  <link rel="stylesheet" href="style3.css">
-
-</head>
-<body>
-  <div class="conveyor" id="conveyor"></div>
-
   <script>
     const firebaseConfig = {
-       apiKey: "AIzaSyD4d7JvLj90ar0Q8o_AEXFTjhMZF-oI-DU",
-    authDomain: "interaction-lab-3-c4513.firebaseapp.com",
-    databaseURL: "https://interaction-lab-3-c4513-default-rtdb.firebaseio.com",
-    projectId: "interaction-lab-3-c4513",
-    storageBucket: "interaction-lab-3-c4513.appspot.com",
-    messagingSenderId: "40397314576",
-    appId: "1:40397314576:web:b6bbbeb99fd43bda508895"
+      apiKey: "AIzaSyD4d7JvLj90ar0Q8o_AEXFTjhMZF-oI-DU",
+      authDomain: "interaction-lab-3-c4513.firebaseapp.com",
+      databaseURL: "https://interaction-lab-3-c4513-default-rtdb.firebaseio.com",
+      projectId: "interaction-lab-3-c4513",
+      storageBucket: "interaction-lab-3-c4513.appspot.com",
+      messagingSenderId: "40397314576",
+      appId: "1:40397314576:web:b6bbbeb99fd43bda508895"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+  </script>
+</head>
+<body>
 
-    const conveyor = document.getElementById('conveyor');
-    let boxId = 0;
+<a class="back-button" href="About.html">뒤로가기</a>
+<div id="color-sequence-display"></div>
+<div class="buttons" style="text-align:center; margin-top: 20px;">
+  <button class="start-button" data-type="type1">빨강</button>
+  <button class="start-button" data-type="type2">초록</button>
+  <button class="start-button" data-type="type3">파랑</button>
+</div>
+<div id="conveyor"></div>
 
-    function createBox() {
-      const type = 'type' + (Math.floor(Math.random() * 3) + 1);
-      const shapes = ['shape-square', 'shape-circle', 'shape-triangle'];
-      const shape = shapes[Math.floor(Math.random() * shapes.length)];
-      const x = -100;
+<script>
+  const conveyor = document.getElementById('conveyor');
+  const types = ['type1', 'type2', 'type3'];
+  const boxWidth = 70;
+  const boxSpacing = 130;
+  const boxes = [];
+  let selectedType = null;
+  const speed = 3;
+  const spawnDelay = 3 * 1000;
+  const spawnInterval = 90; // 프레임 단위
+  let spawnTimer = 0;
+  let gameStarted = false;
 
-      const boxData = {
-        id: boxId++,
-        type,
-        shape,
-        x
-      };
+  // Firebase 경로
+  const outgoingColorsRef = db.ref('game/outgoingColors');
+  const incomingBoxesRef = db.ref('game/2p_incomingBoxes');
 
-      const boxRef = db.ref('boxes').push();
-      boxRef.set(boxData);
+  // 정답 배열 관련
+  const targetLength = 3;
+  let currentSequence = [];
+  let currentIndex = 0;
+
+  function generateRandomSequence() {
+    const seq = [];
+    for (let i = 0; i < targetLength; i++) {
+      seq.push(types[Math.floor(Math.random() * types.length)]);
+    }
+    return seq;
+  }
+
+  function displaySequence(seq) {
+    const display = document.getElementById('color-sequence-display');
+    display.innerHTML = '';
+    seq.forEach(type => {
+      const div = document.createElement('div');
+      div.className = color-sequence-block color-${type};
+      display.appendChild(div);
+    });
+  }
+
+  function resetSequence() {
+    currentSequence = generateRandomSequence();
+    currentIndex = 0;
+    displaySequence(currentSequence);
+  }
+
+  resetSequence();
+
+  document.querySelectorAll('.start-button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedType = btn.dataset.type;
+    });
+  });
+
+  function createBox() {
+    const boxId = box${Date.now()};
+    const boxEl = document.createElement('div');
+    boxEl.classList.add('box');
+    boxEl.setAttribute('data-id', boxId);
+    boxEl.style.left = -boxWidth + 'px';
+    conveyor.appendChild(boxEl);
+
+    const boxObj = {
+      id: boxId,
+      el: boxEl,
+      left: -boxWidth,
+      type: 'none'
+    };
+
+    boxEl.addEventListener('click', () => {
+      if (selectedType) {
+        boxEl.classList.remove('show-color-type1', 'show-color-type2', 'show-color-type3');
+        boxEl.classList.add(show-color-${selectedType});
+        boxObj.type = selectedType;
+
+        if (selectedType === currentSequence[currentIndex]) {
+          currentIndex++;
+          if (currentIndex >= currentSequence.length) {
+            resetSequence();
+          }
+        } else {
+          window.location.href = 'Fail.html';
+        }
+      }
+    });
+
+    boxes.push(boxObj);
+  }
+
+  // 게임 시작 타이머 (3초 후 시작)
+  setTimeout(() => {
+    gameStarted = true;
+  }, spawnDelay);
+
+  // 애니메이션 루프
+  setInterval(() => {
+    if (!gameStarted) return;
+
+    spawnTimer++;
+    if (spawnTimer >= spawnInterval) {
+      createBox();
+      spawnTimer = 0;
     }
 
-    setInterval(createBox, 1500); // 1.5초마다 박스 생성
-  </script>
+    for (let i = boxes.length - 1; i >= 0; i--) {
+      const box = boxes[i];
+      box.left += speed;
+      box.el.style.left = box.left + 'px';
+
+      if (box.left > window.innerWidth) {
+        if (box.type === 'none') {
+          window.location.href = 'Fail.html';
+        } else {
+          // 2P용 큐에 박스 정보 push
+          incomingBoxesRef.push({
+            type: box.type,
+            timestamp: Date.now()
+          });
+        }
+        box.el.remove();
+        boxes.splice(i, 1);
+      }
+    }
+  }, 1000 / 30);
+</script>
+
 </body>
 </html>
