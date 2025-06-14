@@ -81,59 +81,31 @@
 <div id="conveyor"></div>
 
 <script>
-  const conveyor = document.getElementById('conveyor');
-  const types = ['type1', 'type2', 'type3','type4'];
-  const boxWidth = 70;
-  const boxSpacing = 130;
-  const boxes = [];
-  let selectedType = null;
-  const speed = 3;
-  const spawnDelay = 3 * 1000;
-  const spawnInterval = 90; // 프레임 단위
-  let spawnTimer = 0;
-  let gameStarted = false;
+const conveyor = document.getElementById('conveyor');
+const types = ['type1', 'type2', 'type3', 'type4'];
+const boxWidth = 70;
+const boxes = [];
+let selectedType = null;
+const speed = 3;
+const spawnDelay = 3 * 1000;
+const spawnInterval = 90;
+let spawnTimer = 0;
+let gameStarted = false;
 
-  // Firebase 경로
-  const outgoingColorsRef = db.ref('game/outgoingColors');
-  const incomingBoxesRef = db.ref('game/2p_incomingBoxes');
+// Firebase 경로
+const incomingBoxesRef = db.ref('game/2p_incomingBoxes');
 
-  // 정답 배열 관련
-  const targetLength = 3;
-  let currentSequence = [];
-  let currentIndex = 0;
+// 이미지 파일명 매핑
+const imgMap = {
+  'type1': ['html/media/red1.png', 'html/media/red2.png'],
+  'type2': ['html/media/green1.png', 'html/media/green2.png'],
+  'type3': ['html/media/blue1.png', 'html/media/blue2.png'],
+  'type4': ['html/media/yellow1.png', 'html/media/yellow2.png']
+};
 
-  function generateRandomSequence() {
-    const seq = [];
-    for (let i = 0; i < targetLength; i++) {
-      seq.push(types[Math.floor(Math.random() * types.length)]);
-    }
-    return seq;
-  }
-
- function displaySequence(seq) {
-  const display = document.getElementById('color-sequence-display');
-  display.innerHTML = '';
-  seq.forEach(type => {
-    const div = document.createElement('div');
-    div.className = `color-sequence-block color-${type}`; 
-    display.appendChild(div);
-  });
+function getRandomType() {
+  return types[Math.floor(Math.random() * types.length)];
 }
-
-
-  function resetSequence() {
-    currentSequence = generateRandomSequence();
-    currentIndex = 0;
-    displaySequence(currentSequence);
-  }
-
-  resetSequence();
-
-  document.querySelectorAll('.start-button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      selectedType = btn.dataset.type;
-    });
-  });
 
 function createBox() {
   const boxId = `box${Date.now()}`;
@@ -141,33 +113,31 @@ function createBox() {
   imgEl.classList.add('box-img');
   imgEl.setAttribute('data-id', boxId);
   imgEl.style.left = -boxWidth + 'px';
-  imgEl.src = 'default.png'; // 기본 무채색 이미지(없으면 투명한 1px PNG도 가능)
+
+  // 무작위 타입 지정
+  const randomType = getRandomType();
+  imgEl.dataset.type = randomType;
+  imgEl.dataset.state = '1'; // 1: 기본, 2: 버튼 클릭 후
+  imgEl.src = imgMap[randomType][0]; // 1번 이미지
+
   conveyor.appendChild(imgEl);
 
   const boxObj = {
     id: boxId,
     el: imgEl,
     left: -boxWidth,
-    type: 'none'
+    type: randomType
   };
 
   imgEl.addEventListener('click', () => {
-    if (selectedType) {
-      // 이미지 파일 변경
-      boxObj.type = selectedType;
-      if (selectedType === 'type1') imgEl.src = 'html/media/red1.png';
-      else if (selectedType === 'type2') imgEl.src = 'html/media/green1.png';
-      else if (selectedType === 'type3') imgEl.src = 'html/media/blue1.png';
-       else if (selectedType === 'type4') imgEl.src = 'html/media/yellow1.png';
-
-
-      if (selectedType === currentSequence[currentIndex]) {
-        currentIndex++;
-        if (currentIndex >= currentSequence.length) {
-          resetSequence();
-        }
+    if (selectedType && selectedType === boxObj.type) {
+      // 상태 토글: 1 → 2, 2 → 1
+      if (imgEl.dataset.state === '1') {
+        imgEl.src = imgMap[boxObj.type][1];
+        imgEl.dataset.state = '2';
       } else {
-        window.location.href = 'Fail.html';
+        imgEl.src = imgMap[boxObj.type][0];
+        imgEl.dataset.state = '1';
       }
     }
   });
@@ -175,43 +145,48 @@ function createBox() {
   boxes.push(boxObj);
 }
 
+// 버튼 클릭 시 선택 타입 지정
+document.querySelectorAll('.start-button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedType = btn.dataset.type;
+  });
+});
 
+// 게임 시작 타이머
+setTimeout(() => {
+  gameStarted = true;
+}, spawnDelay);
 
-  // 게임 시작 타이머 (3초 후 시작)
-  setTimeout(() => {
-    gameStarted = true;
-  }, spawnDelay);
+// 애니메이션 루프
+setInterval(() => {
+  if (!gameStarted) return;
 
-  // 애니메이션 루프
-  setInterval(() => {
-    if (!gameStarted) return;
-
-    spawnTimer++;
-    if (spawnTimer >= spawnInterval) {
-      createBox();
-      spawnTimer = 0;
-    }
-
- for (let i = boxes.length - 1; i >= 0; i--) {
-  const box = boxes[i];
-  box.left += speed;
-  box.el.style.left = box.left + 'px';
-
-  if (box.left > window.innerWidth) {
-    if (box.type === 'none') {
-      window.location.href = 'Fail.html';
-    } else {
-      incomingBoxesRef.push({
-        type: box.type,
-        timestamp: Date.now()
-      });
-    }
-    box.el.remove();
-    boxes.splice(i, 1);
+  spawnTimer++;
+  if (spawnTimer >= spawnInterval) {
+    createBox();
+    spawnTimer = 0;
   }
-}
 
-  }, 1000 / 30);
+  for (let i = boxes.length - 1; i >= 0; i--) {
+    const box = boxes[i];
+    box.left += speed;
+    box.el.style.left = box.left + 'px';
+
+    if (box.left > window.innerWidth) {
+      if (!box.type) {
+        window.location.href = 'Fail.html';
+      } else {
+        incomingBoxesRef.push({
+          type: box.type,
+          timestamp: Date.now()
+        });
+      }
+      box.el.remove();
+      boxes.splice(i, 1);
+    }
+  }
+}, 1000 / 30);
+
 </script>
 
 </body>
