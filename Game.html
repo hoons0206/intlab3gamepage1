@@ -15,20 +15,11 @@
       overflow: hidden;
       white-space: nowrap;
     }
- .box {
-      width: 70px;
-      height: 70px;
-      margin: 10px 120px;
-      display: inline-block;
-      border-radius: 1px;
-      position: absolute;
-      top: 10px;
-      background-color: #111;
- }
+
     .show-color-type1 { background-color: red !important; }
     .show-color-type2 { background-color: green !important; }
     .show-color-type3 { background-color: blue !important; }
-    .show-color-type3 { background-color: yellow !important; }
+    .show-color-type4 { background-color: yellow !important; }
     .back-button {
       display: inline-block;
       margin: 10px;
@@ -48,7 +39,7 @@
     .color-type1 { background-color: red; }
     .color-type2 { background-color: green; }
     .color-type3 { background-color: blue; }
-    .color-type3 { background-color: yellow; }
+    .color-type4 { background-color: yellow; }
   </style>
 
   <!-- Firebase -->
@@ -69,8 +60,6 @@
   </script>
 </head>
 <body>
-
-<a class="back-button" href="About.html">뒤로가기</a>
 <div id="color-sequence-display"></div>
 <div class="buttons" style="text-align:center; margin-top: 20px;">
   <button class="start-button" data-type="type1">빨강</button>
@@ -78,6 +67,7 @@
   <button class="start-button" data-type="type3">파랑</button>
    <button class="start-button" data-type="type4">노랑</button>
 </div>
+  
 <div id="conveyor"></div>
 
 <script>
