@@ -134,7 +134,7 @@ body {
       display: inline-block;
       border-radius: 1px;
       position: absolute;
-      top: 40px;
+      top: 10px;
       background-color: #111;
  }
     .show-color-type1 { background-color: red !important; }
