@@ -117,3 +117,37 @@ body {
     display: none !important;
   }
 }
+
+#conveyor {
+      position: absolute;
+      left: 0;
+      bottom: 50%;
+      width: 100vw;
+      height: 100px;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+ .box {
+      width: 70px;
+      height: 70px;
+      margin: 10px 120px;
+      display: inline-block;
+      border-radius: 1px;
+      position: absolute;
+      top: 40px;
+      background-color: #111;
+ }
+    .show-color-type1 { background-color: red !important; }
+    .show-color-type2 { background-color: green !important; }
+    .show-color-type3 { background-color: blue !important; }
+
+    .color-sequence-block {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      margin: 4px;
+      border-radius: 4px;
+    }
+    .color-type1 { background-color: red; }
+    .color-type2 { background-color: green; }
+    .color-type3 { background-color: blue; }
