@@ -135,7 +135,7 @@ body {
       border-radius: 1px;
       position: absolute;
       top: 10px;
-      background-color: #111;
+      background-color: #403e3e;
  }
     .show-color-type1 { background-color: red !important; }
     .show-color-type2 { background-color: green !important; }
