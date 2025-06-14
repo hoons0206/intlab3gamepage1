@@ -132,26 +132,29 @@
     });
   });
 
-  function createBox() {
-  const boxId = `box${Date.now()}`; // ✅ 백틱 사용
-  const boxEl = document.createElement('div');
-  boxEl.classList.add('box');
-  boxEl.setAttribute('data-id', boxId);
-  boxEl.style.left = -boxWidth + 'px';
-  conveyor.appendChild(boxEl);
+function createBox() {
+  const boxId = `box${Date.now()}`;
+  const imgEl = document.createElement('img');
+  imgEl.classList.add('box-img');
+  imgEl.setAttribute('data-id', boxId);
+  imgEl.style.left = -boxWidth + 'px';
+  imgEl.src = 'default.png'; // 기본 무채색 이미지(없으면 투명한 1px PNG도 가능)
+  conveyor.appendChild(imgEl);
 
   const boxObj = {
     id: boxId,
-    el: boxEl,
+    el: imgEl,
     left: -boxWidth,
     type: 'none'
   };
 
-  boxEl.addEventListener('click', () => {
+  imgEl.addEventListener('click', () => {
     if (selectedType) {
-      boxEl.classList.remove('show-color-type1', 'show-color-type2', 'show-color-type3');
-      boxEl.classList.add(`show-color-${selectedType}`); // ✅ 백틱 사용
+      // 이미지 파일 변경
       boxObj.type = selectedType;
+      if (selectedType === 'type1') imgEl.src = 'red1.png';
+      else if (selectedType === 'type2') imgEl.src = 'green1.png';
+      else if (selectedType === 'type3') imgEl.src = 'blue1.png';
 
       if (selectedType === currentSequence[currentIndex]) {
         currentIndex++;
@@ -166,6 +169,7 @@
 
   boxes.push(boxObj);
 }
+
 
 
   // 게임 시작 타이머 (3초 후 시작)
@@ -183,25 +187,25 @@
       spawnTimer = 0;
     }
 
-    for (let i = boxes.length - 1; i >= 0; i--) {
-      const box = boxes[i];
-      box.left += speed;
-      box.el.style.left = box.left + 'px';
+ for (let i = boxes.length - 1; i >= 0; i--) {
+  const box = boxes[i];
+  box.left += speed;
+  box.el.style.left = box.left + 'px';
 
-      if (box.left > window.innerWidth) {
-        if (box.type === 'none') {
-          window.location.href = 'Fail.html';
-        } else {
-          // 2P용 큐에 박스 정보 push
-          incomingBoxesRef.push({
-            type: box.type,
-            timestamp: Date.now()
-          });
-        }
-        box.el.remove();
-        boxes.splice(i, 1);
-      }
+  if (box.left > window.innerWidth) {
+    if (box.type === 'none') {
+      window.location.href = 'Fail.html';
+    } else {
+      incomingBoxesRef.push({
+        type: box.type,
+        timestamp: Date.now()
+      });
     }
+    box.el.remove();
+    boxes.splice(i, 1);
+  }
+}
+
   }, 1000 / 30);
 </script>
 
