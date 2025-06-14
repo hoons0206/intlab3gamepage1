@@ -107,15 +107,16 @@
     return seq;
   }
 
-  function displaySequence(seq) {
-    const display = document.getElementById('color-sequence-display');
-    display.innerHTML = '';
-    seq.forEach(type => {
-      const div = document.createElement('div');
-      div.className = color-sequence-block color-${type};
-      display.appendChild(div);
-    });
-  }
+ function displaySequence(seq) {
+  const display = document.getElementById('color-sequence-display');
+  display.innerHTML = '';
+  seq.forEach(type => {
+    const div = document.createElement('div');
+    div.className = `color-sequence-block color-${type}`; 
+    display.appendChild(div);
+  });
+}
+
 
   function resetSequence() {
     currentSequence = generateRandomSequence();
@@ -132,39 +133,40 @@
   });
 
   function createBox() {
-    const boxId = box${Date.now()};
-    const boxEl = document.createElement('div');
-    boxEl.classList.add('box');
-    boxEl.setAttribute('data-id', boxId);
-    boxEl.style.left = -boxWidth + 'px';
-    conveyor.appendChild(boxEl);
+  const boxId = `box${Date.now()}`; // ✅ 백틱 사용
+  const boxEl = document.createElement('div');
+  boxEl.classList.add('box');
+  boxEl.setAttribute('data-id', boxId);
+  boxEl.style.left = -boxWidth + 'px';
+  conveyor.appendChild(boxEl);
 
-    const boxObj = {
-      id: boxId,
-      el: boxEl,
-      left: -boxWidth,
-      type: 'none'
-    };
+  const boxObj = {
+    id: boxId,
+    el: boxEl,
+    left: -boxWidth,
+    type: 'none'
+  };
 
-    boxEl.addEventListener('click', () => {
-      if (selectedType) {
-        boxEl.classList.remove('show-color-type1', 'show-color-type2', 'show-color-type3');
-        boxEl.classList.add(show-color-${selectedType});
-        boxObj.type = selectedType;
+  boxEl.addEventListener('click', () => {
+    if (selectedType) {
+      boxEl.classList.remove('show-color-type1', 'show-color-type2', 'show-color-type3');
+      boxEl.classList.add(`show-color-${selectedType}`); // ✅ 백틱 사용
+      boxObj.type = selectedType;
 
-        if (selectedType === currentSequence[currentIndex]) {
-          currentIndex++;
-          if (currentIndex >= currentSequence.length) {
-            resetSequence();
-          }
-        } else {
-          window.location.href = 'Fail.html';
+      if (selectedType === currentSequence[currentIndex]) {
+        currentIndex++;
+        if (currentIndex >= currentSequence.length) {
+          resetSequence();
         }
+      } else {
+        window.location.href = 'Fail.html';
       }
-    });
+    }
+  });
 
-    boxes.push(boxObj);
-  }
+  boxes.push(boxObj);
+}
+
 
   // 게임 시작 타이머 (3초 후 시작)
   setTimeout(() => {
