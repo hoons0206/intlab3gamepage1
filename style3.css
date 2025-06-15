@@ -111,15 +111,16 @@ body {
   }
 }
 
-#conveyor {
+ #conveyor {
       position: absolute;
       left: 0;
-      bottom: 10%;
+      bottom: 50%;
       width: 100vw;
       height: 100px;
       overflow: hidden;
       white-space: nowrap;
     }
+
  .box-img {
       width: 100px;
       height: 100px;
