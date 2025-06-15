@@ -146,11 +146,11 @@ body {
 
   #timer-bar-container {
     position: fixed;
-    top: 10px;
+    top: 7px;
     left: 50%;
     transform: translateX(-50%);
     width: 80vw;
-    height: 20px;
+    height: 10px;
     background-color: #ccc;
     border-radius: 10px;
     overflow: hidden;
