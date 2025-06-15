@@ -62,6 +62,11 @@
 </head>
 <body>
 <div id="color-sequence-display"></div>
+  
+<div id="timer-bar-container">
+  <div id="timer-bar"></div>
+</div>
+  
 <div class="buttons" style="text-align:center; margin-top: 20px;">
   <button class="start-button" data-type="type1">빨강</button>
   <button class="start-button" data-type="type2">초록</button>
@@ -163,23 +168,44 @@ setInterval(() => {
     box.left += speed;
     box.el.style.left = box.left + 'px';
 
-    if (box.left > window.innerWidth) {
-      if (!box.type) {
-        window.location.href = 'Fail.html';
-      } else {
-        incomingBoxesRef.push({
-  type: box.type,
-  state: box.el.dataset.state,  // ← 이걸 추가해야 열림/닫힘 상태도 전달됨!
-  timestamp: Date.now()
-});
+if (box.left > window.innerWidth) {
+  // 상태가 닫히지 않은 상태면 실패로 이동
+  if (box.el.dataset.state === '1') {
+    window.location.href = 'Fail.html';
+    return;
+  }
 
-      }
-      box.el.remove();
-      boxes.splice(i, 1);
-    }
+  // 정상적으로 닫힌 박스만 Firebase로 전송
+  incomingBoxesRef.push({
+    type: box.type,
+    state: box.el.dataset.state,
+    timestamp: Date.now()
+  });
+
+  box.el.remove();
+  boxes.splice(i, 1);
+}
   }
 }, 1000 / 30);
 
+</script>
+
+<script>
+  // 게이지바 채우기 (1분)
+  const timerBar = document.getElementById('timer-bar');
+  let gaugeStartTime = Date.now();
+  const gaugeDuration = 60 * 1000; // 1분
+
+  const gaugeInterval = setInterval(() => {
+    const elapsed = Date.now() - gaugeStartTime;
+    const percent = Math.min(100, (elapsed / gaugeDuration) * 100);
+    timerBar.style.width = percent + '%';
+
+    // 1분이 지나면 게이지 멈춤
+    if (elapsed >= gaugeDuration) {
+      clearInterval(gaugeInterval);
+    }
+  }, 1000);
 </script>
 
 </body>
