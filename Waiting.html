@@ -21,9 +21,12 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // ✅ 1P가 대기 페이지에 도달하면 Firebase에 알림
+    // ✅ 1P가 대기 페이지에 도달하면 Firebase에 알림 + 3초 후 Success 이동
     window.addEventListener('load', () => {
       db.ref('game/waiting').set({ status: 'waiting' });
+      setTimeout(() => {
+        window.location.href = 'Success.html';
+      }, 3000);
     });
   </script>
 </head>
@@ -47,19 +50,6 @@
         typedEl.innerHTML = text.slice(0, idx).replace(/\n/g, '<br>');
         idx++;
         setTimeout(typeNext, 60);
-      } else {
-        const button = document.querySelector('.start-button');
-        if (button) {
-          button.style.display = 'inline-block';
-          button.style.opacity = '0';
-          button.animate([
-            { opacity: 0 },
-            { opacity: 1 }
-          ], {
-            duration: 1000,
-            fill: 'forwards'
-          });
-        }
       }
     }
 
