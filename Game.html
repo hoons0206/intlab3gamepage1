@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -5,6 +6,42 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <link rel="stylesheet" href="style3.css">
+  <style>
+    #conveyor {
+      position: absolute;
+      left: 0;
+      bottom: 50%;
+      width: 100vw;
+      height: 100px;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .show-color-type1 { background-color: red !important; }
+    .show-color-type2 { background-color: green !important; }
+    .show-color-type3 { background-color: blue !important; }
+    .show-color-type4 { background-color: yellow !important; }
+    .back-button {
+      display: inline-block;
+      margin: 10px;
+      padding: 8px 16px;
+      background: #eee;
+      border-radius: 6px;
+      text-decoration: none;
+      color: #222;
+    }
+    .color-sequence-block {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      margin: 4px;
+      border-radius: 4px;
+    }
+    .color-type1 { background-color: red; }
+    .color-type2 { background-color: green; }
+    .color-type3 { background-color: blue; }
+    .color-type4 { background-color: yellow; }
+  </style>
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -24,142 +61,152 @@
   </script>
 </head>
 <body>
-
 <div id="color-sequence-display"></div>
-
+  
 <div id="timer-bar-container">
   <div id="timer-bar"></div>
 </div>
-
+  
 <div class="buttons" style="text-align:center; margin-top: 20px;">
   <button class="start-button" data-type="type1">빨강</button>
   <button class="start-button" data-type="type2">초록</button>
   <button class="start-button" data-type="type3">파랑</button>
-  <button class="start-button" data-type="type4">노랑</button>
+   <button class="start-button" data-type="type4">노랑</button>
 </div>
-
+  
 <div id="conveyor"></div>
 
 <script>
-  const conveyor = document.getElementById('conveyor');
-  const types = ['type1', 'type2', 'type3', 'type4'];
-  const boxWidth = 70;
-  const boxes = [];
-  let selectedType = null;
-  const speed = 3;
-  const spawnDelay = 3 * 1000;
-  const spawnInterval = 90;
-  let spawnTimer = 0;
-  let gameStarted = false;
+const conveyor = document.getElementById('conveyor');
+const types = ['type1', 'type2', 'type3', 'type4'];
+const boxWidth = 70;
+const boxes = [];
+let selectedType = null;
+const speed = 3;
+const spawnDelay = 3 * 1000;
+const spawnInterval = 90;
+let spawnTimer = 0;
+let gameStarted = false;
 
-  const incomingBoxesRef = db.ref('game/2p_incomingBoxes');
+// Firebase 경로
+const incomingBoxesRef = db.ref('game/2p_incomingBoxes');
 
-  const imgMap = {
-    'type1': ['html/media/red1.png', 'html/media/red2.png'],
-    'type2': ['html/media/green1.png', 'html/media/green2.png'],
-    'type3': ['html/media/blue1.png', 'html/media/blue2.png'],
-    'type4': ['html/media/yellow1.png', 'html/media/yellow2.png']
+// 이미지 파일명 매핑
+const imgMap = {
+  'type1': ['html/media/red1.png', 'html/media/red2.png'],
+  'type2': ['html/media/green1.png', 'html/media/green2.png'],
+  'type3': ['html/media/blue1.png', 'html/media/blue2.png'],
+  'type4': ['html/media/yellow1.png', 'html/media/yellow2.png']
+};
+
+function getRandomType() {
+  return types[Math.floor(Math.random() * types.length)];
+}
+
+function createBox() {
+  const boxId = `box${Date.now()}`;
+  const imgEl = document.createElement('img');
+  imgEl.classList.add('box-img');
+  imgEl.setAttribute('data-id', boxId);
+  imgEl.style.left = -boxWidth + 'px';
+
+  // 무작위 타입 지정
+  const randomType = getRandomType();
+  imgEl.dataset.type = randomType;
+  imgEl.dataset.state = '1'; // 1: 기본, 2: 버튼 클릭 후
+  imgEl.src = imgMap[randomType][0]; // 1번 이미지
+
+  conveyor.appendChild(imgEl);
+
+  const boxObj = {
+    id: boxId,
+    el: imgEl,
+    left: -boxWidth,
+    type: randomType
   };
 
-  function getRandomType() {
-    return types[Math.floor(Math.random() * types.length)];
-  }
-
-  function createBox() {
-    const boxId = `box${Date.now()}`;
-    const imgEl = document.createElement('img');
-    imgEl.classList.add('box-img');
-    imgEl.setAttribute('data-id', boxId);
-    imgEl.style.left = -boxWidth + 'px';
-
-    const randomType = getRandomType();
-    imgEl.dataset.type = randomType;
-    imgEl.dataset.state = '1'; // 초기 상태
-    imgEl.src = imgMap[randomType][0];
-
-    conveyor.appendChild(imgEl);
-
-    const boxObj = {
-      id: boxId,
-      el: imgEl,
-      left: -boxWidth,
-      type: randomType
-    };
-
-    imgEl.addEventListener('click', () => {
-      if (selectedType && selectedType === boxObj.type) {
-        if (imgEl.dataset.state === '1') {
-          imgEl.src = imgMap[boxObj.type][1];
-          imgEl.dataset.state = '2';
-        } else {
-          imgEl.src = imgMap[boxObj.type][0];
-          imgEl.dataset.state = '1';
-        }
+  imgEl.addEventListener('click', () => {
+    if (selectedType && selectedType === boxObj.type) {
+      // 상태 토글: 1 → 2, 2 → 1
+      if (imgEl.dataset.state === '1') {
+        imgEl.src = imgMap[boxObj.type][1];
+        imgEl.dataset.state = '2';
+      } else {
+        imgEl.src = imgMap[boxObj.type][0];
+        imgEl.dataset.state = '1';
       }
-    });
-
-    boxes.push(boxObj);
-  }
-
-  document.querySelectorAll('.start-button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      selectedType = btn.dataset.type;
-    });
+    }
   });
 
-  setTimeout(() => {
-    gameStarted = true;
-  }, spawnDelay);
+  boxes.push(boxObj);
+}
 
-  let gaugeInterval; // ⬅️ 전역으로 선언
+// 버튼 클릭 시 선택 타입 지정
+document.querySelectorAll('.start-button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedType = btn.dataset.type;
+  });
+});
 
-  setInterval(() => {
-    if (!gameStarted) return;
+// 게임 시작 타이머
+setTimeout(() => {
+  gameStarted = true;
+}, spawnDelay);
 
-    spawnTimer++;
-    if (spawnTimer >= spawnInterval) {
-      createBox();
-      spawnTimer = 0;
-    }
+// 애니메이션 루프
+setInterval(() => {
+  if (!gameStarted) return;
 
-    for (let i = boxes.length - 1; i >= 0; i--) {
-      const box = boxes[i];
-      box.left += speed;
-      box.el.style.left = box.left + 'px';
+  spawnTimer++;
+  if (spawnTimer >= spawnInterval) {
+    createBox();
+    spawnTimer = 0;
+  }
 
-      if (box.left > window.innerWidth) {
-        if (box.el.dataset.state === '1') {
-          clearInterval(gaugeInterval); // ✅ 성공 타이머 중단
-          window.location.href = 'Fail.html';
-          return;
-        }
+  for (let i = boxes.length - 1; i >= 0; i--) {
+    const box = boxes[i];
+    box.left += speed;
+    box.el.style.left = box.left + 'px';
 
-        incomingBoxesRef.push({
-          type: box.type,
-          state: box.el.dataset.state,
-          timestamp: Date.now()
-        });
+if (box.left > window.innerWidth) {
+  // 상태가 닫히지 않은 상태면 실패로 이동
+  if (box.el.dataset.state === '1') {
+    window.location.href = 'Fail.html';
+    return;
+  }
 
-        box.el.remove();
-        boxes.splice(i, 1);
-      }
-    }
-  }, 1000 / 30);
+  // 정상적으로 닫힌 박스만 Firebase로 전송
+  incomingBoxesRef.push({
+    type: box.type,
+    state: box.el.dataset.state,
+    timestamp: Date.now()
+  });
 
+  box.el.remove();
+  boxes.splice(i, 1);
+}
+  }
+}, 1000 / 30);
+
+</script>
+
+<script>
   const timerBar = document.getElementById('timer-bar');
   let gaugeStartTime = Date.now();
   const gaugeDuration = 30 * 1000; // 30초
 
-  gaugeInterval = setInterval(() => {
+  const gaugeInterval = setInterval(() => {
     const elapsed = Date.now() - gaugeStartTime;
     const percent = Math.min(100, (elapsed / gaugeDuration) * 100);
     timerBar.style.width = percent + '%';
 
     if (elapsed >= gaugeDuration) {
       clearInterval(gaugeInterval);
+
+      // 30초 동안 실패하지 않으면 성공 페이지로 이동
       window.location.href = 'Success.html';
     }
-  }, 1000);
+  }, 1000); 
 </script>
 
 </body>
