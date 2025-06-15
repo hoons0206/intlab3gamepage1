@@ -62,6 +62,11 @@
 </head>
 <body>
 <div id="color-sequence-display"></div>
+  
+<div id="timer-bar-container">
+  <div id="timer-bar"></div>
+</div>
+  
 <div class="buttons" style="text-align:center; margin-top: 20px;">
   <button class="start-button" data-type="type1">빨강</button>
   <button class="start-button" data-type="type2">초록</button>
@@ -71,35 +76,15 @@
   
 <div id="conveyor"></div>
 
-<div id="blackout-overlay"></div>
+  <div id="blackout-overlay"></div>
 
 </div>
 <audio id="electric-sound" src="html/media/zap.mp3" preload="auto"></audio>
 <audio id="close-sound" src="html/media/closebox.mp3"></audio>
-<audio id="bgm" src="html/media/factorybgm.mp3" autoplay loop></audio>
 
 
-<button id="mute-toggle" style="
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  z-index: 999;
-  background: rgba(255,255,255,0.8);
-  border: none;
-  padding: 6px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-">🔊</button>
 
 <script>
-  const bgm = document.getElementById('bgm');
-  const muteToggle = document.getElementById('mute-toggle');
-
-  muteToggle.addEventListener('click', () => {
-    bgm.muted = !bgm.muted;
-    muteToggle.textContent = bgm.muted ? '🔇' : '🔊';
-  });
-
 const conveyor = document.getElementById('conveyor');
 const types = ['type1', 'type2', 'type3', 'type4'];
 const boxWidth = 70;
@@ -132,15 +117,6 @@ function createBox() {
   imgEl.classList.add('box-img');
   imgEl.setAttribute('data-id', boxId);
   imgEl.style.left = -boxWidth + 'px';
-  imgEl.addEventListener('click', () => {
-  if (selectedType && selectedType === boxObj.type) {
-    const closeSound = document.getElementById('close-sound');
-    if (closeSound) closeSound.play();
-
-    // 열림/닫힘 이미지 토글 로직은 그대로
-  }
-});
-
 
   // 무작위 타입 지정
   const randomType = getRandomType();
@@ -158,17 +134,21 @@ function createBox() {
   };
 
   imgEl.addEventListener('click', () => {
-    if (selectedType && selectedType === boxObj.type) {
-      // 상태 토글: 1 → 2, 2 → 1
-      if (imgEl.dataset.state === '1') {
-        imgEl.src = imgMap[boxObj.type][1];
-        imgEl.dataset.state = '2';
-      } else {
-        imgEl.src = imgMap[boxObj.type][0];
-        imgEl.dataset.state = '1';
-      }
+  if (selectedType && selectedType === boxObj.type) {
+    const closeSound = document.getElementById('close-sound');
+    closeSound.currentTime = 0; // 매번 처음부터 재생되도록 설정
+    closeSound.play();
+
+    // 상태 토글: 1 → 2, 2 → 1
+    if (imgEl.dataset.state === '1') {
+      imgEl.src = imgMap[boxObj.type][1];
+      imgEl.dataset.state = '2';
+    } else {
+      imgEl.src = imgMap[boxObj.type][0];
+      imgEl.dataset.state = '1';
     }
-  });
+  }
+});
 
   boxes.push(boxObj);
 }
@@ -200,189 +180,46 @@ setInterval(() => {
     box.left += speed;
     box.el.style.left = box.left + 'px';
 
-    if (box.left > window.innerWidth) {
-      if (!box.type) {
-        window.location.href = 'Fail.html';
-      } else {
-        incomingBoxesRef.push({
-  type: box.type,
-  state: box.el.dataset.state,  // ← 이걸 추가해야 열림/닫힘 상태도 전달됨!
-  timestamp: Date.now()
-});
+if (box.left > window.innerWidth) {
+  // 상태가 닫히지 않은 상태면 실패로 이동
+  if (box.el.dataset.state === '1') {
+    window.location.href = 'Fail.html';
+    return;
+  }
 
-      }
-      box.el.remove();
-      boxes.splice(i, 1);
-    }
+  // 정상적으로 닫힌 박스만 Firebase로 전송
+  incomingBoxesRef.push({
+    type: box.type,
+    state: box.el.dataset.state,
+    timestamp: Date.now()
+  });
+
+  box.el.remove();
+  boxes.splice(i, 1);
+}
   }
 }, 1000 / 30);
 
-// 지도 열고 닫기 이벤트
-const miniMap = document.getElementById('mini-map');
-const mapOverlay = document.getElementById('map-overlay');
-
-miniMap.addEventListener('click', () => {
-  mapOverlay.classList.toggle('show');
-});
-
-mapOverlay.addEventListener('click', () => {
-  mapOverlay.classList.remove('show');
-});
-// 미로 맵 생성
-const mazeGrid = document.getElementById('maze-grid');
-const mazeSize = 10;
-let playerX = 0;
-let playerY = 0;
-
-function renderMaze() {
-  mazeGrid.innerHTML = '';
-  for (let y = 0; y < mazeSize; y++) {
-    for (let x = 0; x < mazeSize; x++) {
-      const cell = document.createElement('div');
-      cell.classList.add('maze-cell');
-      if (x === playerX && y === playerY) {
-        cell.classList.add('player');
-      }
-      mazeGrid.appendChild(cell);
-    }
-  }
-}
-
-renderMaze();
-
-
-
-document.addEventListener('DOMContentLoaded', () => {
-  const gridSize = 5;
-  const grid = document.getElementById('grid');
-  const cells = [];
-  let x = 0, y = 0;
-
-  const guideShape = [
-    [0, 1, 0, 0, 0],
-    [1, 1, 1, 0, 0],
-    [0, 1, 0, 0, 0],
-    [0, 1, 0, 0, 0],
-    [1, 1, 1, 0, 0]
-  ];
-
-  for (let i = 0; i < gridSize * gridSize; i++) {
-    const div = document.createElement('div');
-    div.classList.add('cell');
-    grid.appendChild(div);
-    cells.push(div);
-  }
-
-  for (let row = 0; row < gridSize; row++) {
-    for (let col = 0; col < gridSize; col++) {
-      const idx = row * gridSize + col;
-      if (guideShape[row][col] === 1) {
-        cells[idx].classList.add('guide');
-      }
-    }
-  }
-
-  function updateCursor() {
-    cells.forEach(c => c.classList.remove('cursor'));
-    cells[y * gridSize + x].classList.add('cursor');
-  }
-  updateCursor();
-
-  function isShapeMatched() {
-    for (let row = 0; row < gridSize; row++) {
-      for (let col = 0; col < gridSize; col++) {
-        const idx = row * gridSize + col;
-        const isActive = cells[idx].classList.contains('active');
-        if ((guideShape[row][col] === 1 && !isActive) || (guideShape[row][col] === 0 && isActive)) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  document.addEventListener('keydown', (e) => {
-    if (!document.getElementById('map-overlay').classList.contains('show')) return;
-
-    if (e.key === 'ArrowUp' && y > 0) y--;
-    if (e.key === 'ArrowDown' && y < gridSize - 1) y++;
-    if (e.key === 'ArrowLeft' && x > 0) x--;
-    if (e.key === 'ArrowRight' && x < gridSize - 1) x++;
-    if (e.code === 'Space') {
-      const idx = y * gridSize + x;
-      cells[idx].classList.toggle('active');
-    }
-    updateCursor();
-
-    if (isShapeMatched()) {
-      const keyData = {
-        type: 'generatedKey',
-        shape: guideShape,
-        color: 'gold',
-        timestamp: Date.now()
-      };
-      db.ref('game/keys/generatedKey').set(keyData)
-        .then(() => alert("🔐 열쇠 완성! 2P에게 전달됨."));
-    }
-  });
-});
-
-function triggerBlackout() {
-  const blackout = document.getElementById('blackout-overlay');
-  const sound = document.getElementById('electric-sound');
-
-  blackout.classList.add('active');
-  sound.play();
-
-  // 박스 클릭 잠시 비활성화
-  document.querySelectorAll('.box-img').forEach(box => {
-    box.style.pointerEvents = 'none';
-  });
-
-  // 3초 후 복구
-  setTimeout(() => {
-    blackout.classList.remove('active');
-    document.querySelectorAll('.box-img').forEach(box => {
-      box.style.pointerEvents = 'auto';
-    });
-  }, 3000);
-}
-
-
-
-let blackoutCount = 0;
-const maxBlackouts = 10;
-
-function startBlackoutLoop() {
-  function scheduleNextBlackout() {
-    const delay = Math.random() * 20000 + 10000; // 10~30초 사이
-    setTimeout(() => {
-      triggerBlackout(); // ← 네가 이미 만든 정전 함수
-      blackoutCount++;
-
-      if (blackoutCount < maxBlackouts) {
-        scheduleNextBlackout(); // 다음 정전 예약
-      }
-    }, delay);
-  }
-
-  scheduleNextBlackout(); // 첫 정전 예약 시작
-}
-window.onload = () => {
-  // 다른 초기화 코드들...
-  startBlackoutLoop(); // 정전 루프 시작!
-};
-document.addEventListener('click', () => {
-  const audios = document.querySelectorAll('audio');
-  audios.forEach(audio => {
-    audio.muted = false;
-    audio.play().catch(e => console.warn("음악 재생 실패:", e));
-  });
-}, { once: true });
-
 </script>
 
+<script>
+  const timerBar = document.getElementById('timer-bar');
+  let gaugeStartTime = Date.now();
+  const gaugeDuration = 60 * 1000; // 30초
 
+  const gaugeInterval = setInterval(() => {
+    const elapsed = Date.now() - gaugeStartTime;
+    const percent = Math.min(100, (elapsed / gaugeDuration) * 100);
+    timerBar.style.width = percent + '%';
+
+    if (elapsed >= gaugeDuration) {
+      clearInterval(gaugeInterval);
+
+      // 30초 동안 실패하지 않으면 성공 페이지로 이동
+      window.location.href = 'Waiting.html';
+    }
+  }, 1000); 
+</script>
 
 </body>
 </html>
