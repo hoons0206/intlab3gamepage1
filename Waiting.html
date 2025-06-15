@@ -2,10 +2,10 @@
 <html>
 <head>
   <title>About</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <link rel="stylesheet" href="style2.css">
-  <meta charset="UTF-8">
-  <title>Waiting</title>
+
+  <!-- ✅ Firebase 추가 -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script>
@@ -21,21 +21,17 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 성공 신호 기다리기
-    db.ref('game/result').on('value', (snapshot) => {
-      const result = snapshot.val();
-      if (result && result.status === 'success') {
-        window.location.href = 'success.html';
-      }
+    // ✅ 1P가 대기 페이지에 도달하면 Firebase에 알림
+    window.addEventListener('load', () => {
+      db.ref('game/waiting').set({ status: 'waiting' });
     });
+  </script>
 </head>
-  
-<body>
 
+<body>
   <div class="intro">
     <p id="typed-text"></p>
   </div>
-
 
   <div class="crt-bloom"></div>
   <div class="crt-frame"></div>
@@ -53,20 +49,21 @@
         setTimeout(typeNext, 60);
       } else {
         const button = document.querySelector('.start-button');
-        button.style.display = 'inline-block';
-        button.style.opacity = '0';
-        button.animate([
-          { opacity: 0 },
-          { opacity: 1 }
-        ], {
-          duration: 1000,
-          fill: 'forwards'
-        });
+        if (button) {
+          button.style.display = 'inline-block';
+          button.style.opacity = '0';
+          button.animate([
+            { opacity: 0 },
+            { opacity: 1 }
+          ], {
+            duration: 1000,
+            fill: 'forwards'
+          });
+        }
       }
     }
 
     setTimeout(typeNext, 1000);
   </script>
-
 </body>
 </html>
