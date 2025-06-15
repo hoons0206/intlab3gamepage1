@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -167,9 +168,11 @@ setInterval(() => {
         window.location.href = 'Fail.html';
       } else {
         incomingBoxesRef.push({
-          type: box.type,
-          timestamp: Date.now()
-        });
+  type: box.type,
+  state: box.el.dataset.state,  // ← 이걸 추가해야 열림/닫힘 상태도 전달됨!
+  timestamp: Date.now()
+});
+
       }
       box.el.remove();
       boxes.splice(i, 1);
